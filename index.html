@@ -32,6 +32,24 @@
         }
     </script>
     <style type="text/tailwindcss">
+            /* 新增：全局背景图样式（直接加在最顶部） */
+        body {
+            background: url("https://maxwellvv.github.io/avatars/bg.jpg") no-repeat center center fixed;
+            background-size: cover; /* 让背景图铺满整个屏幕，不变形 */
+            position: relative;
+        }
+        /* 新增：背景半透明遮罩（关键！防止遮挡文字） */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.85); /* 白色遮罩，0.85是透明度，可调整 */
+            z-index: -1; /* 遮罩放在内容下方，不遮挡按钮/文字 */
+        }
+        
         @layer utilities {
             .card-shadow {
                 box-shadow: 0 4px 12px rgba(30, 58, 138, 0.1);
