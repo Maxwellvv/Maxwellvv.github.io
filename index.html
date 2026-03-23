@@ -120,6 +120,18 @@
                     </label>
                 </div>
 
+                <!-- 新增：月卡开关 -->
+                <div class="flex items-center mb-6">
+                    <input 
+                        type="checkbox" 
+                        id="monthCard" 
+                        class="w-5 h-5 text-secondary focus:ring-secondary rounded" 
+                    >
+                    <label for="monthCard" class="ml-2 text-gray-600">
+                        开启月卡收益（每日200嵌晶玉，每卡池17天，按卡池顺序累加）
+                    </label>
+                </div>
+
                 <!-- 新增：卡池顺序选择 -->
                 <div class="mb-4">
                     <label class="block text-gray-600 mb-3 font-medium">卡池顺序预测方案</label>
@@ -212,7 +224,7 @@
         <!-- 底部区 -->
         <footer class="text-center text-gray-500 text-sm">
             <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-                <p>数据依据：1抽=500嵌晶玉，100%保底=120抽/角色，数学期望=79.7抽/角色；洛茜/李芷妍/卡缪+30抽，弭弗/庄方宜+50抽</p>
+                <p>数据依据：1抽=500嵌晶玉，100%保底=120抽/角色，数学期望=79.7抽/角色；洛茜/李芷妍/卡缪+30抽，弭弗/庄方宜+50抽；月卡每日200嵌晶玉，每卡池17天</p>
                 <button id="resetBtn" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors">
                     重置所有选择
                 </button>
@@ -238,6 +250,7 @@
             const jadeInput = document.getElementById('jadeInput');
             const inputError = document.getElementById('inputError');
             const futureResource = document.getElementById('futureResource');
+            const monthCard = document.getElementById('monthCard'); // 新增：月卡元素
             const orderSchemeRadios = document.querySelectorAll('input[name="orderScheme"]');
             const roleCardsContainer = document.getElementById('roleCardsContainer');
             const resetBtn = document.getElementById('resetBtn');
@@ -268,6 +281,8 @@
             let jadeValue = 0;          // 当前嵌晶玉数量
             const DRAWS_PER_ROLE_GUARANTEE = 120; // 单角色100%保底抽数
             const DRAWS_PER_ROLE_EXPECT = 79.7;   // 单角色数学期望抽数
+            const CARD_POOL_DAYS = 17;            // 新增：每个角色卡池持续天数
+            const MONTH_CARD_DAILY_JADE = 200;    // 新增：月卡每日获得嵌晶玉数量
             
             // 角色差异化后续抽数配置（核心修改）
             const ROLE_DRAWS_CONFIG = {
@@ -353,7 +368,7 @@
             }
 
             /**
-             * 计算选中角色的后续抽数总和（差异化累加）
+             * 计算选中角色的后续抽数总和（差异化累加 + 月卡收益）
              * @returns {number} 后续抽数总和
              */
             function calculateFutureDraws() {
@@ -370,10 +385,22 @@
                     if (order > maxOrder) maxOrder = order;
                 });
                 
-                // 累加从第1位到最大顺序位的所有角色抽数
+                // 1. 累加差异化抽数（原有逻辑）
                 for (let i = 0; i < maxOrder; i++) {
                     const roleName = currentRoleOrder[i];
                     total += ROLE_DRAWS_CONFIG[roleName];
+                }
+                
+                // 2. 新增：计算月卡收益抽数
+                if (monthCard.checked && maxOrder > 0) {
+                    // 总天数 = 最大顺位 × 每个卡池天数
+                    const totalDays = maxOrder * CARD_POOL_DAYS;
+                    // 月卡总嵌晶玉 = 总天数 × 每日收益
+                    const monthCardTotalJade = totalDays * MONTH_CARD_DAILY_JADE;
+                    // 转换为抽数（1抽=500嵌晶玉，向下取整）
+                    const monthCardDraws = Math.floor(monthCardTotalJade / 500);
+                    // 累加到总后续抽数
+                    total += monthCardDraws;
                 }
                 
                 return total;
@@ -494,7 +521,7 @@
             function calculateResult() {
                 // 1. 基础计算：当前抽数 = 嵌晶玉 / 500
                 const currentDrawsValue = Math.floor(jadeValue / 500);
-                // 2. 后续抽数
+                // 2. 后续抽数（含月卡收益）
                 const futureDrawsValue = calculateFutureDraws();
                 // 3. 总可用抽数
                 const totalDrawsValue = currentDrawsValue + futureDrawsValue;
@@ -515,7 +542,15 @@
                 currentDraws.textContent = `${formatThousand(currentDrawsValue)} 抽`;
                 currentJade.textContent = `（${formatThousand(jadeValue)} 嵌晶玉）`;
                 futureDraws.textContent = `${formatThousand(futureDrawsValue)} 抽`;
-                futureDesc.textContent = `（差异化抽数累加 - 方案${currentScheme}）`;
+                
+                // 新增：更新后续抽数描述（显示月卡状态）
+                let futureDescText = `（差异化抽数累加 - 方案${currentScheme}`;
+                if (monthCard.checked && futureResource.checked) {
+                    futureDescText += ' + 月卡收益';
+                }
+                futureDescText += '）';
+                futureDesc.textContent = futureDescText;
+                
                 requiredDraws.textContent = `${formatThousand(requiredDrawsValue)} 抽`;
                 requiredDesc.textContent = `（${selectedCount}个角色 × 120抽/角色）`;
                 expectDraws.textContent = `${formatThousand(expectDrawsValue.toFixed(1))} 抽`;
@@ -621,6 +656,13 @@
             });
 
             /**
+             * 新增：月卡开关切换
+             */
+            monthCard.addEventListener('change', function() {
+                calculateResult();
+            });
+
+            /**
              * 重置按钮
              */
             resetBtn.addEventListener('click', function() {
@@ -649,6 +691,8 @@
                 
                 // 重置后续资源开关为选中
                 futureResource.checked = true;
+                // 新增：重置月卡开关为未选中
+                monthCard.checked = false;
                 
                 // 重新渲染和计算
                 renderRoleCards();
