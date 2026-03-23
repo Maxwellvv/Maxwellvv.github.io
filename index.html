@@ -224,7 +224,7 @@
         <!-- 底部区 -->
         <footer class="text-center text-gray-500 text-sm">
             <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-                <p>数据依据：1抽=500嵌晶玉，100%保底=120抽/角色，数学期望=79.7抽/角色；洛茜/李芷妍/卡缪+30抽，弭弗/庄方宜+50抽；月卡每日200嵌晶玉，每卡池17天</p>
+                <p>数据依据：1抽=500嵌晶玉，100%保底=120抽/角色，数学期望=79.7抽/角色；月卡每日200嵌晶玉，每卡池17天</p>
                 <button id="resetBtn" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors">
                     重置所有选择
                 </button>
@@ -284,13 +284,24 @@
             const CARD_POOL_DAYS = 17;            // 新增：每个角色卡池持续天数
             const MONTH_CARD_DAILY_JADE = 200;    // 新增：月卡每日获得嵌晶玉数量
             
-            // 角色差异化后续抽数配置（核心修改）
+            // 角色差异化后续抽数配置（按方案拆分 - 核心修改）
             const ROLE_DRAWS_CONFIG = {
-                '洛茜': 30,
-                '弭弗': 50,
-                '李芷妍': 30,
-                '庄方宜': 50,
-                '卡缪': 30
+                // 方案1抽数规则
+                '1': {
+                    '洛茜': 30,
+                    '弭弗': 50,
+                    '李芷妍': 30,
+                    '庄方宜': 50,
+                    '卡缪': 30
+                },
+                // 方案2抽数规则
+                '2': {
+                    '洛茜': 30,
+                    '庄方宜': 50,
+                    '弭弗': 30,
+                    '李芷妍': 50,
+                    '卡缪': 30
+                }
             };
             
             // 角色头像配置（替换为实际图片URL）
@@ -308,27 +319,27 @@
                 '2': ['洛茜', '庄方宜', '弭弗', '李芷妍', '卡缪']  // 方案2
             };
             
-            // 角色基础信息配置
+            // 角色基础信息配置（同步更新方案说明）
             const ROLE_CONFIGS = {
                 '洛茜': {
                     desc: '当前UP角色(+30抽)',
-                    info: '洛茜：当前UP角色（固定卡池首位），对应卡池期间可额外获取30抽'
+                    info: '洛茜：当前UP角色（固定卡池首位），方案1/2均额外获取30抽'
                 },
                 '弭弗': {
-                    desc: '后续UP角色(+50抽)',
-                    info: '弭弗：方案1=第2位，方案2=第3位，对应卡池期间可额外获取50抽'
+                    desc: '后续UP角色(方案1+50抽/方案2+30抽)',
+                    info: '弭弗：方案1=第2位(+50抽)，方案2=第3位(+30抽)'
                 },
                 '庄方宜': {
-                    desc: '后续UP角色(+50抽)',
-                    info: '庄方宜：方案1=第4位，方案2=第2位，对应卡池期间可额外获取50抽'
+                    desc: '后续UP角色(方案1+50抽/方案2+50抽)',
+                    info: '庄方宜：方案1=第4位(+50抽)，方案2=第2位(+50抽)'
                 },
                 '李芷妍': {
-                    desc: '辅助定位(+30抽)',
-                    info: '李芷妍：方案1=第3位，方案2=第4位，对应卡池期间可额外获取30抽'
+                    desc: '辅助定位(方案1+30抽/方案2+50抽)',
+                    info: '李芷妍：方案1=第3位(+30抽)，方案2=第4位(+50抽)'
                 },
                 '卡缪': {
                     desc: '后续版本(+30抽)',
-                    info: '卡缪：方案1/2均为第5位，对应卡池期间可额外获取30抽'
+                    info: '卡缪：方案1/2均为第5位，额外获取30抽'
                 }
             };
             
@@ -385,10 +396,11 @@
                     if (order > maxOrder) maxOrder = order;
                 });
                 
-                // 1. 累加差异化抽数（原有逻辑）
+                // 1. 累加差异化抽数（核心修改：按当前方案取抽数）
                 for (let i = 0; i < maxOrder; i++) {
                     const roleName = currentRoleOrder[i];
-                    total += ROLE_DRAWS_CONFIG[roleName];
+                    // 关键：从当前方案的配置中取抽数
+                    total += ROLE_DRAWS_CONFIG[currentScheme][roleName];
                 }
                 
                 // 2. 新增：计算月卡收益抽数
@@ -453,6 +465,8 @@
                     const roleConfig = ROLE_CONFIGS[roleName];
                     const isChecked = roleCheckedStatus[roleName];
                     const avatarUrl = ROLE_AVATAR_CONFIG[roleName];
+                    // 获取当前方案下该角色的抽数
+                    const roleDraws = ROLE_DRAWS_CONFIG[currentScheme][roleName];
                     
                     // 创建角色卡片DOM
                     const card = document.createElement('div');
@@ -472,7 +486,7 @@
                         <input type="checkbox" id="role-${roleName}" class="role-checkbox hidden" ${isChecked ? 'checked' : ''}>
                         <label for="role-${roleName}" class="cursor-pointer text-sm font-medium">
                             ${roleName}<br>
-                            <span class="text-gray-500 text-xs">${roleConfig.desc}</span>
+                            <span class="text-gray-500 text-xs">+${roleDraws}抽（方案${currentScheme}）</span>
                         </label>
                         <button class="role-info mt-1 text-gray-400 hover:text-secondary" data-info="${roleConfig.info}">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -641,7 +655,7 @@
                     });
                     this.closest('.card-order-option').classList.add('radio-active');
                     
-                    // 重新渲染角色卡片（保持选中状态）
+                    // 重新渲染角色卡片（保持选中状态，更新抽数显示）
                     renderRoleCards();
                     // 重新计算结果
                     calculateResult();
