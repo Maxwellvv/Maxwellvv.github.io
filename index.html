@@ -4,17 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>终末地抽卡资源测算工具</title>
-    <!-- 引入Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- 自定义游戏风格配色 -->
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        primary: '#1E3A8A',    // 深蓝主色
-                        secondary: '#3B82F6',  // 蓝色辅助色
-                        accent: '#F97316',     // 橙色强调色
+                        primary: '#1E3A8A',
+                        secondary: '#3B82F6',
+                        accent: '#F97316',
                         gray: {
                             100: '#F8FAFC',
                             200: '#EFF6FF',
@@ -32,13 +30,11 @@
         }
     </script>
     <style type="text/tailwindcss">
-            /* 新增：全局背景图样式（直接加在最顶部） */
         body {
             background: url("https://maxwellvv.github.io/avatars/bg.jpg") no-repeat center center fixed;
-            background-size: cover; /* 让背景图铺满整个屏幕，不变形 */
+            background-size: cover;
             position: relative;
         }
-        /* 新增：背景半透明遮罩（关键！防止遮挡文字） */
         body::before {
             content: "";
             position: fixed;
@@ -46,15 +42,16 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(255, 255, 255, 0.85); /* 白色遮罩，0.85是透明度，可调整 */
-            z-index: -1; /* 遮罩放在内容下方，不遮挡按钮/文字 */
+            background-color: rgba(255, 255, 255, 0.85);
+            z-index: -1;
         }
 
-            /* 新增：卡片背景图+遮罩 */
+        /* 🔥 卡片背景样式（你要的 card-bg.png） */
         .bg-card {
-            background: url("https://maxwellvv.github.io/avatars/card-bg.png") no-repeat center center;
+            background: url("avatars/card-bg.png") no-repeat center center;
             background-size: cover;
             position: relative;
+            z-index: 1;
         }
         .bg-card::before {
             content: "";
@@ -63,12 +60,11 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(255, 255, 255, 0.9);
-            border-radius: 0.75rem; /* 和卡片圆角一致，避免遮罩漏边 */
+           
+            border-radius: 1.5rem;
             z-index: -1;
+            pointer-events: none;
         }
-
-        
         
         @layer utilities {
             .card-shadow {
@@ -100,19 +96,15 @@
 </head>
 <body class="bg-gray-100 min-h-screen py-8 px-4">
     <div class="max-w-6xl mx-auto">
-        <!-- 标题区 -->
         <header class="text-center mb-10">
             <h1 class="text-[clamp(1.8rem,4vw,2.5rem)] font-bold text-primary mb-2">终末地抽卡资源测算工具</h1>
             <p class="text-gray-500 text-[clamp(0.9rem,2vw,1rem)]">100%保底逻辑 + 数学期望测算，拒绝抽卡赌运气</p>
         </header>
 
-        <!-- 操作区 -->
         <div class="grid grid-cols-1 lg:grid-cols-10 gap-6 mb-10">
-            <!-- 左侧：基础输入模块（lg占4列） -->
-            <div class="lg:col-span-4 bg-white rounded-xl p-6 card-shadow bg-card relative z-10">
+            <!-- 🔥 资源输入区 + 背景图 -->
+            <div class="lg:col-span-4 rounded-xl p-6 card-shadow bg-card relative z-10">
                 <h2 class="text-lg font-bold text-primary mb-4">资源输入</h2>
-                
-                <!-- 嵌晶玉输入框 -->
                 <div class="mb-6">
                     <label for="jadeInput" class="block text-gray-600 mb-2">当前嵌晶玉数量</label>
                     <div class="relative">
@@ -127,7 +119,6 @@
                     <p id="inputError" class="text-red-500 text-sm mt-1 hidden">仅支持0及以上整数</p>
                 </div>
 
-                <!-- 后续资源开关 -->
                 <div class="flex items-center mb-6">
                     <input 
                         type="checkbox" 
@@ -140,7 +131,6 @@
                     </label>
                 </div>
 
-                <!-- 新增：月卡开关 -->
                 <div class="flex items-center mb-6">
                     <input 
                         type="checkbox" 
@@ -152,73 +142,47 @@
                     </label>
                 </div>
 
-                <!-- 新增：卡池顺序选择 -->
                 <div class="mb-4">
                     <label class="block text-gray-600 mb-3 font-medium">卡池顺序预测方案</label>
                     <div class="grid grid-cols-1 gap-3">
-                        <!-- 方案1 -->
                         <label class="card-order-option border border-gray-300 rounded-lg p-3 cursor-pointer transition-all hover:border-secondary">
-                            <input 
-                                type="radio" 
-                                name="orderScheme" 
-                                value="1" 
-                                class="w-5 h-5 text-secondary focus:ring-secondary mr-2" 
-                                checked
-                            >
+                            <input type="radio" name="orderScheme" value="1" class="w-5 h-5 text-secondary focus:ring-secondary mr-2" checked>
                             <span class="text-gray-700">方案1：洛茜 → 弭弗 → 李芷妍 → 庄方宜 → 卡缪</span>
                         </label>
-                        <!-- 方案2 -->
                         <label class="card-order-option border border-gray-300 rounded-lg p-3 cursor-pointer transition-all hover:border-secondary">
-                            <input 
-                                type="radio" 
-                                name="orderScheme" 
-                                value="2" 
-                                class="w-5 h-5 text-secondary focus:ring-secondary mr-2"
-                            >
+                            <input type="radio" name="orderScheme" value="2" class="w-5 h-5 text-secondary focus:ring-secondary mr-2">
                             <span class="text-gray-700">方案2：洛茜 → 庄方宜 → 弭弗 → 李芷妍 → 卡缪</span>
                         </label>
                     </div>
                 </div>
             </div>
 
-            <!-- 右侧：角色选择模块（lg占6列） -->
-            <div class="lg:col-span-6 bg-white rounded-xl p-6 card-shadow bg-card relative z-10">
+            <!-- 🔥 角色选择区 + 背景图 -->
+            <div class="lg:col-span-6 rounded-xl p-6 card-shadow bg-card relative z-10">
                 <h2 class="text-lg font-bold text-primary mb-4">目标角色选择（可多选）</h2>
                 <p class="text-gray-500 text-sm mb-4">注：100%保底=120抽/角色，数学期望=79.7抽/角色；后续资源按角色差异化抽数累加</p>
-                
-                <!-- 角色卡片网格（响应式排列）- 动态渲染容器 -->
-                <div id="roleCardsContainer" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                    <!-- 角色卡片会通过JS动态渲染 -->
-                </div>
+                <div id="roleCardsContainer" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
             </div>
         </div>
 
-        <!-- 结果区 -->
-        <div class="bg-white rounded-xl p-6 card-shadow mb-10 fade-in bg-card relative z-10" id="resultArea">
-            <!-- 数据换算区 -->
+        <!-- 🔥 结果区 + 背景图 -->
+        <div class="rounded-xl p-6 card-shadow mb-10 fade-in bg-card relative z-10" id="resultArea">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                <!-- 当前等效抽数 -->
                 <div class="border border-gray-200 rounded-lg p-4 text-center">
                     <h3 class="text-gray-500 text-sm mb-2">当前等效抽数</h3>
                     <p class="text-2xl font-bold text-primary" id="currentDraws">0 抽</p>
                     <p class="text-gray-500 text-xs mt-1" id="currentJade">（0 嵌晶玉）</p>
                 </div>
-
-                <!-- 后续等效抽数（按选中顺序累加） -->
                 <div class="border border-gray-200 rounded-lg p-4 text-center">
                     <h3 class="text-gray-500 text-sm mb-2">后续等效抽数</h3>
                     <p class="text-2xl font-bold text-secondary" id="futureDraws">0 抽</p>
                     <p class="text-gray-500 text-xs mt-1" id="futureDesc">（差异化抽数累加 - 方案1）</p>
                 </div>
-
-                <!-- 所需总抽数（100%保底） -->
                 <div class="border border-gray-200 rounded-lg p-4 text-center">
                     <h3 class="text-gray-500 text-sm mb-2">所需抽数（100%保底）</h3>
                     <p class="text-2xl font-bold text-accent" id="requiredDraws">0 抽</p>
                     <p class="text-gray-500 text-xs mt-1" id="requiredDesc">（0个角色 × 120抽/角色）</p>
                 </div>
-
-                <!-- 所需总抽数（数学期望）+ 达成率 -->
                 <div class="border border-gray-200 rounded-lg p-4 text-center">
                     <h3 class="text-gray-500 text-sm mb-2">所需抽数（数学期望）</h3>
                     <p class="text-2xl font-bold text-purple-600" id="expectDraws">0 抽</p>
@@ -227,55 +191,44 @@
                 </div>
             </div>
 
-            <!-- 可行性结论区 -->
             <div class="border rounded-lg p-6 mb-6 text-center" id="conclusionCard">
                 <p class="text-gray-500 text-lg" id="conclusionText">请输入嵌晶玉数量并选择目标角色</p>
                 <p class="mt-2 text-sm" id="gapDetail"></p>
                 <p class="mt-2 text-sm text-purple-500" id="expectGapDetail"></p>
             </div>
 
-            <!-- 优化建议区 -->
             <div class="p-4 bg-gray-100 rounded-lg" id="suggestionArea">
                 <h3 class="text-gray-600 font-medium mb-2">优化建议</h3>
                 <p class="text-gray-500 text-sm" id="suggestionText">输入资源并选择角色后，将生成个性化规划建议</p>
             </div>
         </div>
 
-        <!-- 底部区 -->
         <footer class="text-center text-gray-500 text-sm">
             <div class="flex flex-col md:flex-row justify-between items-center gap-4">
                 <p>数据依据：1抽=500嵌晶玉，100%保底=120抽/角色，数学期望=79.7抽/角色；月卡每日200嵌晶玉，每卡池17天</p>
-                <button id="resetBtn" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors">
-                    重置所有选择
-                </button>
+                <button id="resetBtn" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors">重置所有选择</button>
             </div>
         </footer>
 
-        <!-- 角色说明弹窗 -->
         <div id="infoModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
             <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
                 <h3 class="text-lg font-bold text-primary mb-3" id="modalTitle">角色说明</h3>
                 <p class="text-gray-600 mb-4" id="modalContent"></p>
-                <button id="closeModal" class="w-full px-4 py-2 bg-secondary text-white rounded-lg hover:bg-primary transition-colors">
-                    确认
-                </button>
+                <button id="closeModal" class="w-full px-4 py-2 bg-secondary text-white rounded-lg hover:bg-primary transition-colors">确认</button>
             </div>
         </div>
     </div>
 
     <script>
-        // 页面加载完成后执行
         document.addEventListener('DOMContentLoaded', function() {
-            // 1. 获取DOM元素
             const jadeInput = document.getElementById('jadeInput');
             const inputError = document.getElementById('inputError');
             const futureResource = document.getElementById('futureResource');
-            const monthCard = document.getElementById('monthCard'); // 新增：月卡元素
+            const monthCard = document.getElementById('monthCard');
             const orderSchemeRadios = document.querySelectorAll('input[name="orderScheme"]');
             const roleCardsContainer = document.getElementById('roleCardsContainer');
             const resetBtn = document.getElementById('resetBtn');
             
-            // 结果区元素
             const currentDraws = document.getElementById('currentDraws');
             const currentJade = document.getElementById('currentJade');
             const futureDraws = document.getElementById('futureDraws');
@@ -284,185 +237,82 @@
             const requiredDesc = document.getElementById('requiredDesc');
             const expectDraws = document.getElementById('expectDraws');
             const expectDesc = document.getElementById('expectDesc');
-            const expectRate = document.getElementById('expectRate'); // 新增：期望达成率
+            const expectRate = document.getElementById('expectRate');
             const conclusionCard = document.getElementById('conclusionCard');
             const conclusionText = document.getElementById('conclusionText');
             const gapDetail = document.getElementById('gapDetail');
             const expectGapDetail = document.getElementById('expectGapDetail');
             const suggestionText = document.getElementById('suggestionText');
             
-            // 弹窗元素
             const infoModal = document.getElementById('infoModal');
             const modalTitle = document.getElementById('modalTitle');
             const modalContent = document.getElementById('modalContent');
             const closeModal = document.getElementById('closeModal');
 
-            // 2. 初始化数据
-            let jadeValue = 0;          // 当前嵌晶玉数量
-            const DRAWS_PER_ROLE_GUARANTEE = 120; // 单角色100%保底抽数
-            const DRAWS_PER_ROLE_EXPECT = 79.7;   // 单角色数学期望抽数
-            const CARD_POOL_DAYS = 17;            // 新增：每个角色卡池持续天数
-            const MONTH_CARD_DAILY_JADE = 200;    // 新增：月卡每日获得嵌晶玉数量
+            let jadeValue = 0;
+            const DRAWS_PER_ROLE_GUARANTEE = 120;
+            const DRAWS_PER_ROLE_EXPECT = 79.7;
+            const CARD_POOL_DAYS = 17;
+            const MONTH_CARD_DAILY_JADE = 200;
             
-            // 角色差异化后续抽数配置（按方案拆分 - 核心修改）
             const ROLE_DRAWS_CONFIG = {
-                // 方案1抽数规则
-                '1': {
-                    '洛茜': 30,
-                    '弭弗': 50,
-                    '李芷妍': 30,
-                    '庄方宜': 50,
-                    '卡缪': 30
-                },
-                // 方案2抽数规则
-                '2': {
-                    '洛茜': 30,
-                    '庄方宜': 50,
-                    '弭弗': 30,
-                    '李芷妍': 50,
-                    '卡缪': 30
-                }
+                '1': { '洛茜': 30, '弭弗': 50, '李芷妍': 30, '庄方宜': 50, '卡缪': 30 },
+                '2': { '洛茜': 30, '庄方宜': 50, '弭弗': 30, '李芷妍': 50, '卡缪': 30 }
             };
             
-            // 角色头像配置（替换为实际图片URL）
             const ROLE_AVATAR_CONFIG = {
-                '洛茜': './avatars/luoxi.png',    // 替换为实际图片链接
-                '弭弗': './avatars/mifu.png',     // 替换为实际图片链接
-                '李芷妍': './avatars/lizhiyan.png',// 替换为实际图片链接
-                '庄方宜': './avatars/zhuangfangyi.png',// 替换为实际图片链接
-                '卡缪': 'https://example.com/avatar/kaqiu.png'     // 替换为实际图片链接
+                '洛茜': './avatars/luoxi.png',
+                '弭弗': './avatars/mifu.png',
+                '李芷妍': './avatars/lizhiyan.png',
+                '庄方宜': './avatars/zhuangfangyi.png',
+                '卡缪': 'https://example.com/avatar/kaqiu.png'
             };
             
-            // 定义2种卡池顺序方案（洛茜固定首位）
             const ORDER_SCHEMES = {
-                '1': ['洛茜', '弭弗', '李芷妍', '庄方宜', '卡缪'], // 方案1
-                '2': ['洛茜', '庄方宜', '弭弗', '李芷妍', '卡缪']  // 方案2
+                '1': ['洛茜', '弭弗', '李芷妍', '庄方宜', '卡缪'],
+                '2': ['洛茜', '庄方宜', '弭弗', '李芷妍', '卡缪']
             };
             
-            // 角色基础信息配置（同步更新方案说明）
             const ROLE_CONFIGS = {
-                '洛茜': {
-                    desc: '当前UP角色(+30抽)',
-                    info: '洛茜：当前UP角色（固定卡池首位），方案1/2均额外获取30抽'
-                },
-                '弭弗': {
-                    desc: '后续UP角色(方案1+50抽/方案2+30抽)',
-                    info: '弭弗：方案1=第2位(+50抽)，方案2=第3位(+30抽)'
-                },
-                '庄方宜': {
-                    desc: '后续UP角色(方案1+50抽/方案2+50抽)',
-                    info: '庄方宜：方案1=第4位(+50抽)，方案2=第2位(+50抽)'
-                },
-                '李芷妍': {
-                    desc: '辅助定位(方案1+30抽/方案2+50抽)',
-                    info: '李芷妍：方案1=第3位(+30抽)，方案2=第4位(+50抽)'
-                },
-                '卡缪': {
-                    desc: '后续版本(+30抽)',
-                    info: '卡缪：方案1/2均为第5位，额外获取30抽'
-                }
+                '洛茜': { desc: '当前UP角色(+30抽)', info: '洛茜：当前UP角色（固定卡池首位），方案1/2均额外获取30抽' },
+                '弭弗': { desc: '后续UP角色(方案1+50抽/方案2+30抽)', info: '弭弗：方案1=第2位(+50抽)，方案2=第3位(+30抽)' },
+                '庄方宜': { desc: '后续UP角色(方案1+50抽/方案2+50抽)', info: '庄方宜：方案1=第4位(+50抽)，方案2=第2位(+50抽)' },
+                '李芷妍': { desc: '辅助定位(方案1+30抽/方案2+50抽)', info: '李芷妍：方案1=第3位(+30抽)，方案2=第4位(+50抽)' },
+                '卡缪': { desc: '后续版本(+30抽)', info: '卡缪：方案1/2均为第5位，额外获取30抽' }
             };
             
-            let currentScheme = '1'; // 默认选中方案1
-            // 存储角色选中状态（避免切换方案丢失选择）
-            let roleCheckedStatus = {
-                '洛茜': false,
-                '弭弗': false,
-                '庄方宜': false,
-                '李芷妍': false,
-                '卡缪': false
-            };
+            let currentScheme = '1';
+            let roleCheckedStatus = { '洛茜': false, '弭弗': false, '庄方宜': false, '李芷妍': false, '卡缪': false };
 
-            // 预加载头像图片
-            Object.values(ROLE_AVATAR_CONFIG).forEach(url => {
-                const img = new Image();
-                img.src = url;
-            });
+            function formatThousand(num) { return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+            function getRoleOrder(roleName) { return ORDER_SCHEMES[currentScheme].indexOf(roleName) + 1; }
 
-            // 3. 工具函数
-            /**
-             * 格式化数字为千分位
-             * @param {number} num - 待格式化数字
-             * @returns {string} 千分位格式字符串
-             */
-            function formatThousand(num) {
-                return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-            }
-
-            /**
-             * 获取角色在当前方案中的顺序位置
-             * @param {string} roleName - 角色名称
-             * @returns {number} 顺序值（1-5）
-             */
-            function getRoleOrder(roleName) {
-                return ORDER_SCHEMES[currentScheme].indexOf(roleName) + 1;
-            }
-
-            /**
-             * 计算选中角色的后续抽数总和（差异化累加 + 月卡收益）
-             * @returns {number} 后续抽数总和
-             */
             function calculateFutureDraws() {
                 if (!futureResource.checked) return 0;
-                
                 let total = 0;
                 const currentRoleOrder = ORDER_SCHEMES[currentScheme];
                 const selectedRoles = Object.keys(roleCheckedStatus).filter(role => roleCheckedStatus[role]);
-                
-                // 找到选中角色的最大顺序
                 let maxOrder = 0;
-                selectedRoles.forEach(role => {
-                    const order = getRoleOrder(role);
-                    if (order > maxOrder) maxOrder = order;
-                });
+                selectedRoles.forEach(role => { const order = getRoleOrder(role); if (order > maxOrder) maxOrder = order; });
                 
-                // 1. 累加差异化抽数（核心修改：按当前方案取抽数）
-                for (let i = 0; i < maxOrder; i++) {
-                    const roleName = currentRoleOrder[i];
-                    // 关键：从当前方案的配置中取抽数
-                    total += ROLE_DRAWS_CONFIG[currentScheme][roleName];
-                }
-                
-                // 2. 新增：计算月卡收益抽数
+                for (let i = 0; i < maxOrder; i++) { const roleName = currentRoleOrder[i]; total += ROLE_DRAWS_CONFIG[currentScheme][roleName]; }
                 if (monthCard.checked && maxOrder > 0) {
-                    // 总天数 = 最大顺位 × 每个卡池天数
                     const totalDays = maxOrder * CARD_POOL_DAYS;
-                    // 月卡总嵌晶玉 = 总天数 × 每日收益
                     const monthCardTotalJade = totalDays * MONTH_CARD_DAILY_JADE;
-                    // 转换为抽数（1抽=500嵌晶玉，向下取整）
                     const monthCardDraws = Math.floor(monthCardTotalJade / 500);
-                    // 累加到总后续抽数
                     total += monthCardDraws;
                 }
-                
                 return total;
             }
 
-            /**
-             * 计算期望达成率（核心新增）
-             * @param {number} totalDraws - 总可用抽数
-             * @param {number} expectDrawsValue - 期望所需抽数
-             * @param {number} requiredDrawsValue - 保底所需抽数
-             * @returns {string} 百分比字符串（保留1位小数）
-             */
             function calculateExpectRate(totalDraws, expectDrawsValue, requiredDrawsValue) {
                 if (expectDrawsValue === 0) return '0.0%';
-                
-                // 计算基础达成率
                 let rate = (totalDraws / expectDrawsValue) * 100;
-                
-                // 最大值不超过保底上限（保底所需抽数对应的达成率）
                 const maxRate = (requiredDrawsValue / expectDrawsValue) * 100;
                 if (rate > maxRate) rate = maxRate;
-                
-                // 保留1位小数
                 return rate.toFixed(1) + '%';
             }
 
-            /**
-             * 处理头像加载失败
-             * @param {HTMLImageElement} img - 头像图片元素
-             */
             function handleAvatarError(img) {
                 img.style.display = 'none';
                 const textEl = document.createElement('span');
@@ -471,154 +321,90 @@
                 img.parentNode.appendChild(textEl);
             }
 
-            /**
-             * 渲染角色卡片（按当前方案顺序）
-             */
             function renderRoleCards() {
-                // 清空容器
                 roleCardsContainer.innerHTML = '';
-                // 获取当前方案的角色顺序
                 const currentRoleOrder = ORDER_SCHEMES[currentScheme];
-                
-                // 遍历当前方案的角色顺序，渲染卡片
                 currentRoleOrder.forEach(roleName => {
                     const roleConfig = ROLE_CONFIGS[roleName];
                     const isChecked = roleCheckedStatus[roleName];
                     const avatarUrl = ROLE_AVATAR_CONFIG[roleName];
-                    // 获取当前方案下该角色的抽数
                     const roleDraws = ROLE_DRAWS_CONFIG[currentScheme][roleName];
                     
-                    // 创建角色卡片DOM
                     const card = document.createElement('div');
                     card.className = `role-card border border-gray-300 rounded-lg p-3 text-center cursor-pointer transition-all hover:border-secondary ${isChecked ? 'role-card-active' : ''}`;
                     card.dataset.role = roleName;
-                    
                     card.innerHTML = `
                         <div class="w-16 h-16 mx-auto mb-2 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-                            <img 
-                                src="${avatarUrl}" 
-                                alt="${roleName}" 
-                                data-role="${roleName}"
-                                class="w-full h-full object-cover avatar-hover"
-                                onError="handleAvatarError(this)"
-                            >
+                            <img src="${avatarUrl}" alt="${roleName}" data-role="${roleName}" class="w-full h-full object-cover avatar-hover" onError="handleAvatarError(this)">
                         </div>
                         <input type="checkbox" id="role-${roleName}" class="role-checkbox hidden" ${isChecked ? 'checked' : ''}>
-                        <label for="role-${roleName}" class="cursor-pointer text-sm font-medium">
-                            ${roleName}<br>
-                            <span class="text-gray-500 text-xs">+${roleDraws}抽</span>
-                        </label>
+                        <label for="role-${roleName}" class="cursor-pointer text-sm font-medium">${roleName}<br><span class="text-gray-500 text-xs">+${roleDraws}抽</span></label>
                         <button class="role-info mt-1 text-gray-400 hover:text-secondary" data-info="${roleConfig.info}">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                         </button>
                     `;
-                    
                     roleCardsContainer.appendChild(card);
                     
-                    // 绑定卡片点击事件（切换选中状态）
                     card.addEventListener('click', function(e) {
-                        // 阻止事件冒泡，避免重复触发
                         e.preventDefault();
                         const role = this.dataset.role;
                         const checkbox = document.getElementById(`role-${role}`);
-                        
-                        // 如果点击的是信息按钮，不切换选中状态
                         if (e.target.closest('.role-info')) {
                             modalTitle.textContent = `${role} - 角色说明`;
                             modalContent.textContent = ROLE_CONFIGS[role].info;
                             infoModal.classList.remove('hidden');
                             return;
                         }
-                        
-                        // 切换选中状态
                         checkbox.checked = !checkbox.checked;
                         roleCheckedStatus[role] = checkbox.checked;
-                        
-                        // 更新卡片样式
-                        if (checkbox.checked) {
-                            this.classList.add('role-card-active');
-                        } else {
-                            this.classList.remove('role-card-active');
-                        }
-                        
-                        // 重新计算结果
+                        checkbox.checked ? this.classList.add('role-card-active') : this.classList.remove('role-card-active');
                         calculateResult();
                     });
                 });
             }
 
-            /**
-             * 计算并更新所有结果
-             */
             function calculateResult() {
-                // 1. 基础计算：当前抽数 = 嵌晶玉 / 500
                 const currentDrawsValue = Math.floor(jadeValue / 500);
-                // 2. 后续抽数（含月卡收益）
                 const futureDrawsValue = calculateFutureDraws();
-                // 3. 总可用抽数
                 const totalDrawsValue = currentDrawsValue + futureDrawsValue;
-                
-                // 4. 选中角色数量
                 const selectedRoles = Object.keys(roleCheckedStatus).filter(role => roleCheckedStatus[role]);
                 const selectedCount = selectedRoles.length;
-                
-                // 5. 保底所需抽数
                 const requiredDrawsValue = selectedCount * DRAWS_PER_ROLE_GUARANTEE;
-                // 6. 期望所需抽数
                 const expectDrawsValue = selectedCount * DRAWS_PER_ROLE_EXPECT;
-                
-                // 7. 计算达成率
                 const expectRateValue = calculateExpectRate(totalDrawsValue, expectDrawsValue, requiredDrawsValue);
-                
-                // 更新DOM显示
+
                 currentDraws.textContent = `${formatThousand(currentDrawsValue)} 抽`;
                 currentJade.textContent = `（${formatThousand(jadeValue)} 嵌晶玉）`;
                 futureDraws.textContent = `${formatThousand(futureDrawsValue)} 抽`;
-                
-                // 新增：更新后续抽数描述（显示月卡状态）
                 let futureDescText = `（差异化抽数累加 - 方案${currentScheme}`;
-                if (monthCard.checked && futureResource.checked) {
-                    futureDescText += ' + 月卡收益';
-                }
+                if (monthCard.checked && futureResource.checked) futureDescText += ' + 月卡收益';
                 futureDescText += '）';
                 futureDesc.textContent = futureDescText;
-                
                 requiredDraws.textContent = `${formatThousand(requiredDrawsValue)} 抽`;
                 requiredDesc.textContent = `（${selectedCount}个角色 × 120抽/角色）`;
                 expectDraws.textContent = `${formatThousand(expectDrawsValue.toFixed(1))} 抽`;
                 expectDesc.textContent = `（${selectedCount}个角色 × 79.7抽/角色）`;
                 expectRate.textContent = `达成率：${expectRateValue}`;
-                
-                // 计算缺口
+
                 const gapRequired = requiredDrawsValue - totalDrawsValue;
                 const gapExpect = expectDrawsValue - totalDrawsValue;
-                
-                // 更新结论区
+
                 if (selectedCount === 0) {
                     conclusionText.textContent = "请选择目标角色后重新测算";
                     conclusionText.className = "text-gray-500 text-lg";
-                    gapDetail.textContent = "";
-                    expectGapDetail.textContent = "";
+                    gapDetail.textContent = ""; expectGapDetail.textContent = "";
                     suggestionText.textContent = "输入资源并选择角色后，将生成个性化规划建议";
-                    conclusionCard.className = "border rounded-lg p-6 mb-6 text-center";
-                    return;
+                    conclusionCard.className = "border rounded-lg p-6 mb-6 text-center"; return;
                 }
-                
                 if (jadeValue === 0) {
                     conclusionText.textContent = "请输入有效的嵌晶玉数量";
                     conclusionText.className = "text-gray-500 text-lg";
-                    gapDetail.textContent = "";
-                    expectGapDetail.textContent = "";
+                    gapDetail.textContent = ""; expectGapDetail.textContent = "";
                     suggestionText.textContent = "输入资源并选择角色后，将生成个性化规划建议";
-                    conclusionCard.className = "border rounded-lg p-6 mb-6 text-center";
-                    return;
+                    conclusionCard.className = "border rounded-lg p-6 mb-6 text-center"; return;
                 }
-                
-                // 更新结论卡片样式和内容
+
                 if (totalDrawsValue >= requiredDrawsValue) {
-                    // 保底足够
                     conclusionText.textContent = "🎉 资源充足！可100%获取所有选中角色";
                     conclusionText.className = "text-green-600 text-lg font-medium";
                     gapDetail.textContent = `超出保底所需抽数：${formatThousand(Math.abs(gapRequired))} 抽（约 ${formatThousand(Math.abs(gapRequired) * 500)} 嵌晶玉）`;
@@ -626,7 +412,6 @@
                     conclusionCard.className = "border border-green-300 bg-green-50 rounded-lg p-6 mb-6 text-center";
                     suggestionText.textContent = "当前资源充足，建议优先抽取核心角色，剩余资源可预留至后续卡池";
                 } else if (totalDrawsValue >= expectDrawsValue) {
-                    // 期望足够，保底不足
                     conclusionText.textContent = "✅ 资源达标！按数学期望可获取所有选中角色（保底有缺口）";
                     conclusionText.className = "text-blue-600 text-lg font-medium";
                     gapDetail.textContent = `保底缺口：${formatThousand(Math.abs(gapRequired))} 抽（约 ${formatThousand(Math.abs(gapRequired) * 500)} 嵌晶玉）`;
@@ -634,7 +419,6 @@
                     conclusionCard.className = "border border-blue-300 bg-blue-50 rounded-lg p-6 mb-6 text-center";
                     suggestionText.textContent = "资源满足数学期望，建议合理规划抽卡时机，可通过日常任务补充少量资源覆盖保底缺口";
                 } else {
-                    // 期望不足
                     conclusionText.textContent = "⚠️ 资源不足！获取所有角色存在风险";
                     conclusionText.className = "text-red-600 text-lg font-medium";
                     gapDetail.textContent = `保底缺口：${formatThousand(Math.abs(gapRequired))} 抽（约 ${formatThousand(Math.abs(gapRequired) * 500)} 嵌晶玉）`;
@@ -644,121 +428,43 @@
                 }
             }
 
-            // 4. 事件绑定
-            /**
-             * 嵌晶玉输入框处理
-             */
             jadeInput.addEventListener('input', function() {
-                // 清除非数字字符（保留0-9）
                 this.value = this.value.replace(/[^0-9]/g, '');
-                // 隐藏错误提示
                 inputError.classList.add('hidden');
-                
-                // 转换为数字
                 jadeValue = this.value ? parseInt(this.value) : 0;
-                
-                // 计算结果
                 calculateResult();
             });
 
-            /**
-             * 卡池顺序切换
-             */
             orderSchemeRadios.forEach(radio => {
                 radio.addEventListener('change', function() {
-                    // 更新当前方案
                     currentScheme = this.value;
-                    
-                    // 更新单选框样式
-                    document.querySelectorAll('.card-order-option').forEach(option => {
-                        option.classList.remove('radio-active');
-                    });
+                    document.querySelectorAll('.card-order-option').forEach(option => option.classList.remove('radio-active'));
                     this.closest('.card-order-option').classList.add('radio-active');
-                    
-                    // 重新渲染角色卡片（保持选中状态，更新抽数显示）
-                    renderRoleCards();
-                    // 重新计算结果
-                    calculateResult();
+                    renderRoleCards(); calculateResult();
                 });
             });
 
-            /**
-             * 后续资源开关切换
-             */
-            futureResource.addEventListener('change', function() {
-                calculateResult();
-            });
+            futureResource.addEventListener('change', calculateResult);
+            monthCard.addEventListener('change', calculateResult);
 
-            /**
-             * 新增：月卡开关切换
-             */
-            monthCard.addEventListener('change', function() {
-                calculateResult();
-            });
-
-            /**
-             * 重置按钮
-             */
             resetBtn.addEventListener('click', function() {
-                // 重置输入框
-                jadeInput.value = '';
-                jadeValue = 0;
-                
-                // 重置角色选中状态
-                roleCheckedStatus = {
-                    '洛茜': false,
-                    '弭弗': false,
-                    '庄方宜': false,
-                    '李芷妍': false,
-                    '卡缪': false
-                };
-                
-                // 重置卡池方案为1
+                jadeInput.value = ''; jadeValue = 0;
+                roleCheckedStatus = { '洛茜': false, '弭弗': false, '庄方宜': false, '李芷妍': false, '卡缪': false };
                 currentScheme = '1';
-                document.querySelectorAll('input[name="orderScheme"]').forEach(radio => {
-                    radio.checked = radio.value === '1';
-                });
-                document.querySelectorAll('.card-order-option').forEach(option => {
-                    option.classList.remove('radio-active');
-                });
+                document.querySelectorAll('input[name="orderScheme"]').forEach(radio => radio.checked = radio.value === '1');
+                document.querySelectorAll('.card-order-option').forEach(option => option.classList.remove('radio-active'));
                 document.querySelector('input[name="orderScheme"][value="1"]').closest('.card-order-option').classList.add('radio-active');
-                
-                // 重置后续资源开关为选中
-                futureResource.checked = true;
-                // 新增：重置月卡开关为未选中
-                monthCard.checked = false;
-                
-                // 重新渲染和计算
-                renderRoleCards();
-                calculateResult();
-                
-                // 清空错误提示
-                inputError.classList.add('hidden');
+                futureResource.checked = true; monthCard.checked = false;
+                renderRoleCards(); calculateResult(); inputError.classList.add('hidden');
             });
 
-            /**
-             * 弹窗关闭按钮
-             */
-            closeModal.addEventListener('click', function() {
-                infoModal.classList.add('hidden');
-            });
+            closeModal.addEventListener('click', () => infoModal.classList.add('hidden'));
+            infoModal.addEventListener('click', e => e.target === this && infoModal.classList.add('hidden'));
 
-            /**
-             * 点击弹窗外部关闭
-             */
-            infoModal.addEventListener('click', function(e) {
-                if (e.target === this) {
-                    infoModal.classList.add('hidden');
-                }
-            });
-
-            // 5. 初始化
             document.querySelector('input[name="orderScheme"][value="1"]').closest('.card-order-option').classList.add('radio-active');
-            renderRoleCards();
-            calculateResult();
+            renderRoleCards(); calculateResult();
         });
 
-        // 全局头像错误处理函数
         function handleAvatarError(img) {
             img.style.display = 'none';
             const textEl = document.createElement('span');
