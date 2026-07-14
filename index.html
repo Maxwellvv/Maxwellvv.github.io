@@ -2,524 +2,399 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>终末地抽卡资源测算工具 | 保底期望双维度规划</title>
-    <link rel="icon" type="image/png" href="./avatars/favicon.png">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#FFFFFF',
-                        secondary: '#FFFFFF',
-                        accent: '#FFFFFF',
-                        gray: {
-                            100: '#F8FAFC',
-                            200: '#EFF6FF',
-                            300: '#CBD5E1',
-                            400: '#94A3B8',
-                            500: '#64748B',
-                            600: '#475569'
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Akrobat', 'system-ui', 'sans-serif'],  // 将 Akrobat 设为默认无衬线字体
-                    },
-                }
-            }
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>苹果游戏排行榜 - 准确前100 + 可选补充</title>
+    <style>
+        :root {
+            --bg: #f5f5f7; --card-bg: #fff; --text: #1d1d1f;
+            --text-secondary: #86868b; --accent: #0071e3; --border: #d2d2d7;
+            --shadow: 0 2px 12px rgba(0,0,0,0.06);
         }
-    </script>
-    <style type="text/tailwindcss">
+        * { margin:0; padding:0; box-sizing:border-box; }
         body {
-            background: url("./avatars/bg.png") no-repeat center center fixed;
-            background-size: cover;
-            position: relative;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--bg); color: var(--text); min-height: 100vh; padding: 2rem 1rem;
         }
-        body::before {
-            content: "";
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(255, 255, 255, 0.1);
-            z-index: -1;
+        .container { max-width: 860px; margin: 0 auto; }
+        header { text-align: center; margin-bottom: 2rem; }
+        header h1 { font-size: 2.2rem; font-weight: 700; margin-bottom: 0.3rem; }
+        .subtitle { font-size: 0.95rem; color: var(--text-secondary); }
+        .controls {
+            display: flex; justify-content: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;
+            align-items: center;
         }
-
-        .bg-card {
-            background: url("avatars/bg.e2e260.png") no-repeat center center;
-            background-size: cover;
-            position: relative;
-            z-index: 1;
+        .control-group {
+            display: flex; align-items: center; background: var(--card-bg);
+            border-radius: 12px; padding: 0.5rem 1rem; box-shadow: var(--shadow);
         }
-        .bg-card::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-           
-            border-radius: 1.5rem;
-            z-index: -1;
-            pointer-events: none;
+        .control-group label { font-weight: 600; margin-right: 0.5rem; color: var(--text-secondary); }
+        select { border: 1px solid var(--border); border-radius: 8px; padding: 0.4rem 0.8rem; font-size: 1rem; }
+        .check-box {
+            display: flex; align-items: center; background: var(--card-bg);
+            border-radius: 12px; padding: 0.5rem 1.2rem; box-shadow: var(--shadow);
+            gap: 0.4rem; font-weight: 500; cursor: pointer;
         }
-        
-        /* 专属标题栏 ———— 矩形框 + 背景图标 + 圆角，与下方卡片总长度严格一致 */
-        .hero-card {
-            background: rgba(52,52,51,1);
-            background-repeat: repeat, no-repeat;
-            background-size: 55px 55px, cover;
-            background-position: 0 0, center;
-            border-radius: 1.0rem;
-            box-shadow: 0 12px 28px -8px rgba(25, 26, 26, 0.18), 0 2px 6px rgba(0, 0, 0, 0.02);
-            transition: all 0.2s ease;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+        .check-box input { width: 18px; height: 18px; cursor: pointer; }
+        .status { text-align: center; padding: 1.5rem; color: var(--text-secondary); }
+        .rank-list { display: flex; flex-direction: column; gap: 0.75rem; }
+        .rank-item {
+            display: flex; align-items: center; gap: 1rem; background: var(--card-bg);
+            border-radius: 16px; padding: 0.8rem 1.2rem; box-shadow: var(--shadow);
+            text-decoration: none; color: inherit; transition: transform 0.15s, box-shadow 0.15s;
         }
-
-        /* 确保标题文字层级高于装饰 */
-        .hero-card > * {
-            position: relative;
-            z-index: 2;
-        }
-        
-        @layer utilities {
-            .card-shadow {
-                box-shadow: 0 8px 18px rgba(30, 58, 138, 0.08);
-            }
-            .role-card-active {
-                border-color: #F97316;
-                background-color: rgba(249, 115, 22, 0.08);
-                box-shadow: 0 2px 8px rgba(249,115,22,0.12);
-            }
-            .fade-in {
-                animation: fadeIn 0.3s ease-in-out;
-            }
-            .radio-active {
-                background-color: rgba(59, 130, 246, 0.12);
-                border-color: #6e6e6e;
-            }
-            .avatar-hover {
-                transition: transform 0.2s ease, filter 0.2s;
-            }
-            .avatar-hover:hover {
-                transform: scale(1.05);
-                filter: brightness(0.98);
-            }
-            @keyframes fadeIn {
-                from { opacity: 0; transform: translateY(6px); }
-                to { opacity: 1; transform: translateY(0); }
-            }
-        }
-
-        /* 针对移动端微调，标题宽度依然匹配下方卡片 */
-        @media (max-width: 768px) {
-            .hero-card::after {
-                font-size: 40px;
-                bottom: 6px;
-                right: 12px;
-                opacity: 0.1;
-            }
-            .bg-card {
-                background-size: 28px 28px;
-            }
-        }
-        /* 输入框优雅增强 */
-        input, .card-order-option {
-            transition: all 0.2s;
-        }
-        input:focus {
-            border-color: #3B82F6;
-            box-shadow: 0 0 0 2px rgba(59,130,246,0.2);
-        }
-        /* 角色头像容器避免撑开变形 */
-        .role-card img {
-            object-fit: cover;
-        }
-
-
-        /* Akrobat 字体定义 */
-        @font-face {
-            font-family: 'Akrobat';
-            font-weight: 600;      /* semi-bold */
-            src: url('https://bbs.hycdn.cn/public/common-config/others/fonts/Akrobat/1ff3715322c5b7a25833dc4791c00cf0.otf');
-            font-display: swap;    /* 推荐，提升加载体验 */
-        }
-        @font-face {
-            font-family: 'Akrobat';
-            font-weight: 700;      /* bold */
-            src: url('https://bbs.hycdn.cn/public/common-config/others/fonts/Akrobat/bdf75e7059b24a017f9093a1cbbc8898.otf');
-            font-display: swap;
-        }
-
+        .rank-item:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
+        .rank-number { font-size: 1.5rem; font-weight: 700; min-width: 2.2rem; text-align: center; }
+        .rank-number.top3 { color: var(--accent); }
+        .app-icon { width: 64px; height: 64px; border-radius: 16px; background: #f0f0f0; }
+        .app-info { flex: 1; min-width: 0; }
+        .app-name { font-weight: 600; font-size: 1.1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .app-developer { font-size: 0.9rem; color: var(--text-secondary); }
+        .app-price { font-weight: 600; font-size: 1rem; color: var(--accent); min-width: 4rem; text-align: right; }
+        .app-price.free { color: #34c759; }
+        .edit-list { text-align: center; margin-top: 1rem; }
+        .edit-list button { margin: 0 0.5rem; padding: 0.4rem 1rem; border-radius: 8px; border: 1px solid var(--border); background: white; cursor: pointer; }
+        .anime-list-box { display: none; background: white; border-radius: 12px; padding: 1rem; margin-top: 1rem; box-shadow: var(--shadow); text-align: left; max-height: 200px; overflow-y: auto; }
+        .anime-list-box textarea { width: 100%; height: 150px; font-family: monospace; font-size: 0.9rem; }
+        .warning { color: #ff9500; font-weight: 500; }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen py-6 px-4 md:py-8">
-    <div class="max-w-6xl mx-auto">
-        <!-- ========= 全新标题栏：矩形框 + 圆角 + 背景图标，宽度与下方卡片总长度完全相等 ========= -->
-        <div class="hero-card relative w-full mb-8 md:mb-10 p-1 md:p-2">
-            <div class="flex items-center justify-center gap-3 flex-wrap">
-                <!-- 左侧图片图标 -->
-                <img src=".\avatars\logo.png" alt="图标" class="absolute left-4 md:left-6 top-1/2 transform -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 object-contain" 
-                style="width: 120px; height: 60px;">
-                
-                <!-- 右侧文字区域 -->
-                <div class="text-center">
-                    <h1 class="text-[clamp(1.0rem,5vw,1.6rem)] font-extrabold text-primary mb-2 tracking-tight">
-                        终末地抽卡资源测算工具
-                    </h1>
-                    <p class="text-gray-600 text-[clamp(0.5rem,2.2vw,0.8rem)] max-w-2xl mx-auto font-medium">
-                        100%保底逻辑 + 数学期望测算  保底120抽/角色  期望79.7抽/角色  1抽=500嵌晶玉
-                </div>
-            </div>
+<body>
+<div class="container">
+    <header>
+        <h1>🎮 苹果游戏排行榜</h1>
+        <div class="subtitle">前100为官方准确排名，可手动开启品类补充（排名不准）</div>
+    </header>
+
+    <div class="controls">
+        <div class="control-group">
+            <label>🌍 地区</label>
+            <select id="countrySelect">
+                <option value="cn" selected>中国</option>
+                <option value="us">美国</option>
+                <option value="jp">日本</option>
+                <option value="kr">韩国</option>
+            </select>
         </div>
-
-        <!-- 核心双栏区域：资源卡片 + 角色卡片 (宽度自适应，总长度与hero-card一致) -->
-        <div class="grid grid-cols-1 lg:grid-cols-10 gap-6 mb-10">
-            <!-- 资源输入区（背景卡片纹理） -->
-            <div class="lg:col-span-4 rounded-2xl p-6 card-shadow bg-card relative transition-all">
-                <h2 class="text-xl font-bold text-primary mb-4 flex items-center gap-2">
-                    资源输入
-                </h2>
-                <div class="mb-6">
-                    
-                    <div class="relative">
-                        <input 
-                            type="text" 
-                            id="jadeInput" 
-                            placeholder="例如: 12500" 
-                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent transition-all bg-white/80"
-                        >
-                        <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-mono">嵌晶玉</span>
-                    </div>
-                    <p id="inputError" class="text-red-500 text-sm mt-1 hidden">⚠️ 仅支持0及以上整数</p>
-                </div>
-
-                <div class="flex items-center mb-5">
-                    <input type="checkbox" id="futureResource" class="w-5 h-5 text-secondary focus:ring-secondary rounded border-gray-300" checked>
-                    <label for="futureResource" class="ml-3 text-gray-300 select-none">
-                        计入后续资源 <span class="text-gray-400 text-xs">(按卡池顺序累加差异化抽数)</span>
-                    </label>
-                </div>
-
-                <div class="flex items-center mb-6">
-                    <input type="checkbox" id="monthCard" class="w-5 h-5 text-secondary focus:ring-secondary rounded border-gray-300">
-                    <label for="monthCard" class="ml-3 text-gray-300 select-none">
-                        开启月卡收益 <span class="text-gray-400 text-xs">(每日200嵌晶玉，每卡池17天)</span>
-                    </label>
-                </div>
-
-                <div class="mb-2">
-                    <label class="block text-gray-300 font-medium mb-3">卡池顺序预测方案</label>
-                    <div class="grid grid-cols-1 gap-3">
-                        <label class="card-order-option border border-gray-200 rounded-xl p-3 cursor-pointer transition-all hover:border-secondary bg-white/60">
-                            <input type="radio" name="orderScheme" value="1" class="w-5 h-5 text-secondary focus:ring-secondary mr-2" checked>
-                            <span class="text-gray-300 font-medium">方案1：洛茜 → 弭弗 → 李芷妍 → 庄方宜 → 卡缪</span>
-                        </label>
-                        <label class="card-order-option border border-gray-200 rounded-xl p-3 cursor-pointer transition-all hover:border-secondary bg-white/60">
-                            <input type="radio" name="orderScheme" value="2" class="w-5 h-5 text-secondary focus:ring-secondary mr-2">
-                            <span class="text-gray-300 font-medium">方案2：洛茜 → 庄方宜 → 弭弗 → 李芷妍 → 卡缪</span>
-                        </label>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 角色选择区（背景卡片纹理） -->
-            <div class="lg:col-span-6 rounded-2xl p-6 card-shadow bg-card relative">
-                <h2 class="text-xl font-bold text-primary mb-3 flex items-center gap-2">
-                    目标角色选择（可多选）
-                </h2>
-                <p class="text-gray-500 text-sm mb-5">每个角色独立计算保底/期望，后续资源按卡池位置自动叠加差异化抽数</p>
-                <div id="roleCardsContainer" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
-            </div>
+        <div class="control-group">
+            <label>📊 榜单</label>
+            <select id="chartSelect">
+                <option value="topgrossing">畅销榜 (收入)</option>
+                <option value="toppaid">付费下载榜</option>
+            </select>
         </div>
-
-        <!-- 结果展示区（背景卡片纹理） -->
-        <div class="rounded-2xl p-6 card-shadow mb-10 fade-in bg-card relative" id="resultArea">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-5 mb-7">
-                <div class="border border-gray-200/80 bg-white/60 rounded-xl p-4 text-center backdrop-blur-sm">
-                    <h3 class="text-gray-500 text-sm mb-1">当前等效抽数</h3>
-                    <p class="text-2xl font-bold text-primary" id="currentDraws">0 抽</p>
-                    <p class="text-gray-500 text-xs mt-1" id="currentJade">（0 嵌晶玉）</p>
-                </div>
-                <div class="border border-gray-200/80 bg-white/60 rounded-xl p-4 text-center backdrop-blur-sm">
-                    <h3 class="text-gray-500 text-sm mb-1">后续等效抽数</h3>
-                    <p class="text-2xl font-bold text-secondary" id="futureDraws">0 抽</p>
-                    <p class="text-gray-500 text-xs mt-1" id="futureDesc">（差异化抽数累加）</p>
-                </div>
-                <div class="border border-gray-200/80 bg-white/60 rounded-xl p-4 text-center backdrop-blur-sm">
-                    <h3 class="text-gray-500 text-sm mb-1">所需抽数（100%保底）</h3>
-                    <p class="text-2xl font-bold text-accent" id="requiredDraws">0 抽</p>
-                    <p class="text-gray-500 text-xs mt-1" id="requiredDesc">（0个角色 × 120抽）</p>
-                </div>
-                <div class="border border-gray-200/80 bg-white/60 rounded-xl p-4 text-center backdrop-blur-sm">
-                    <h3 class="text-gray-500 text-sm mb-1">所需抽数（数学期望）</h3>
-                    <p class="text-2xl font-bold text-accent" id="expectDraws">0 抽</p>
-                    <p class="text-gray-500 text-xs mt-1" id="expectDesc">（0个角色 × 79.7抽）</p>
-                    <p class="text-gray-600 font-semibold text-sm mt-2" id="expectRate">达成率：0%</p>
-                </div>
-            </div>
-
-            <div class="rounded-xl p-5 mb-6 text-center transition-all duration-200" id="conclusionCard">
-                <p class="text-gray-600 text-base md:text-lg" id="conclusionText">请输入嵌晶玉数量并选择目标角色</p>
-                <p class="mt-2 text-sm font-mono" id="gapDetail"></p>
-                <p class="mt-1 text-sm text-purple-500" id="expectGapDetail"></p>
-            </div>
-
-            <div class="p-4 bg-indigo-50/50 rounded-xl border border-indigo-100">
-                <h3 class="text-gray-700 font-semibold mb-2 flex items-center gap-1">💡 智能规划建议</h3>
-                <p class="text-gray-600 text-sm" id="suggestionText">输入资源并选择角色后，将生成个性化抽卡策略</p>
-            </div>
-        </div>
-
-        <footer class="text-center text-gray-500 text-sm mt-6">
-            <div class="flex flex-col md:flex-row justify-between items-center gap-4 bg-white/40 p-4 rounded-2xl backdrop-blur-sm">
-                <p>⚡ 数据依据：1抽=500嵌晶玉，100%保底=120抽/角色，数学期望≈79.7抽/角色；月卡每日200嵌晶玉，每卡池17天，按顺序叠加</p>
-                <button id="resetBtn" class="px-5 py-2 border border-gray-300 rounded-xl hover:bg-gray-600 transition-all shadow-sm text-primary font-medium">⟳ 重置所有选择</button>
-            </div>
-        </footer>
-
-        <!-- 角色信息弹窗 -->
-        <div id="infoModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden transition-all">
-            <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl animate-fade-in">
-                <h3 class="text-xl font-bold text-primary mb-3" id="modalTitle">角色说明</h3>
-                <p class="text-gray-600 mb-5 leading-relaxed" id="modalContent"></p>
-                <button id="closeModal" class="w-full px-4 py-2 bg-gradient-to-r from-secondary to-primary text-white rounded-xl hover:shadow-md transition">确认</button>
-            </div>
-        </div>
+        <label class="check-box">
+            <input type="checkbox" id="animeFilter">
+            <span>只显示二次元游戏（名称含关键词）</span>
+        </label>
+        <label class="check-box">
+            <input type="checkbox" id="extendCheck">
+            <span>包含子品类补充 <span class="warning">(100名后不准)</span></span>
+        </label>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // DOM 元素绑定
-            const jadeInput = document.getElementById('jadeInput');
-            const inputError = document.getElementById('inputError');
-            const futureResource = document.getElementById('futureResource');
-            const monthCard = document.getElementById('monthCard');
-            const orderSchemeRadios = document.querySelectorAll('input[name="orderScheme"]');
-            const roleCardsContainer = document.getElementById('roleCardsContainer');
-            const resetBtn = document.getElementById('resetBtn');
-            
-            const currentDraws = document.getElementById('currentDraws');
-            const currentJade = document.getElementById('currentJade');
-            const futureDraws = document.getElementById('futureDraws');
-            const futureDesc = document.getElementById('futureDesc');
-            const requiredDraws = document.getElementById('requiredDraws');
-            const requiredDesc = document.getElementById('requiredDesc');
-            const expectDraws = document.getElementById('expectDraws');
-            const expectDesc = document.getElementById('expectDesc');
-            const expectRate = document.getElementById('expectRate');
-            const conclusionCard = document.getElementById('conclusionCard');
-            const conclusionText = document.getElementById('conclusionText');
-            const gapDetail = document.getElementById('gapDetail');
-            const expectGapDetail = document.getElementById('expectGapDetail');
-            const suggestionText = document.getElementById('suggestionText');
-            const infoModal = document.getElementById('infoModal');
-            const modalTitle = document.getElementById('modalTitle');
-            const modalContent = document.getElementById('modalContent');
-            const closeModal = document.getElementById('closeModal');
+    <div id="status" class="status">⏳ 正在拉取总榜前100...</div>
+    <div id="rankContainer" class="rank-list"></div>
 
-            let jadeValue = 0;
-            const DRAWS_PER_ROLE_GUARANTEE = 120;
-            const DRAWS_PER_ROLE_EXPECT = 79.7;
-            const CARD_POOL_DAYS = 17;
-            const MONTH_CARD_DAILY_JADE = 200;
-            
-            const ROLE_DRAWS_CONFIG = {
-                '1': { '洛茜': 30, '弭弗': 50, '李芷妍': 30, '庄方宜': 50, '卡缪': 30 },
-                '2': { '洛茜': 30, '庄方宜': 50, '弭弗': 30, '李芷妍': 50, '卡缪': 30 }
-            };
-            
-            const ROLE_AVATAR_CONFIG = {
-                '洛茜': './avatars/luoxi.png',
-                '弭弗': './avatars/mifu.png',
-                '李芷妍': './avatars/lizhiyan.png',
-                '庄方宜': './avatars/zhuangfangyi.png',
-                '卡缪': 'https://picsum.photos/id/106/100/100'
-            };
-            
-            const ORDER_SCHEMES = {
-                '1': ['洛茜', '弭弗', '李芷妍', '庄方宜', '卡缪'],
-                '2': ['洛茜', '庄方宜', '弭弗', '李芷妍', '卡缪']
-            };
-            
-            const ROLE_CONFIGS = {
-                '洛茜': { desc: '当前UP角色(+30抽)', info: '洛茜：固定卡池首位，方案1/2均额外获取30抽资源，强力主C' },
-                '弭弗': { desc: '后续UP角色(方案1+50抽/方案2+30抽)', info: '弭弗：方案1第二位(+50抽)，方案2第三位(+30抽)，爆发输出型' },
-                '庄方宜': { desc: '后续UP角色(方案1+50抽/方案2+50抽)', info: '庄方宜：方案1第四位(+50抽)，方案2第二位(+50抽)，全能辅助' },
-                '李芷妍': { desc: '辅助定位(方案1+30抽/方案2+50抽)', info: '李芷妍：方案1第三位(+30抽)，方案2第四位(+50抽)，治疗核心' },
-                '卡缪': { desc: '后续版本(+30抽)', info: '卡缪：两方案均为第五位，稳定提供30抽，站场型干员' }
-            };
-            
-            let currentScheme = '1';
-            let roleCheckedStatus = { '洛茜': false, '弭弗': false, '庄方宜': false, '李芷妍': false, '卡缪': false };
+    <div class="edit-list">
+        <button id="editListBtn">📝 编辑二次元关键词</button>
+    </div>
+    <div id="animeListEditor" class="anime-list-box">
+        <textarea id="animeListText"></textarea>
+        <button id="saveListBtn">💾 保存并应用</button>
+        <button id="closeListBtn">关闭</button>
+    </div>
+</div>
 
-            function formatThousand(num) { return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
-            function getRoleOrder(roleName) { return ORDER_SCHEMES[currentScheme].indexOf(roleName) + 1; }
+<script>
+    // 子品类 ID（仅扩展模式使用）
+    const SUB_GENRES = [7001,7002,7003,7004,7005,7006,7007,7008,7009,7010,7011,7012,7013,7014,7015];
+    const TOTAL_GENRE = 6014;
 
-            function calculateFutureDraws() {
-                if (!futureResource.checked) return 0;
-                let total = 0;
-                const currentRoleOrder = ORDER_SCHEMES[currentScheme];
-                const selectedRoles = Object.keys(roleCheckedStatus).filter(role => roleCheckedStatus[role]);
-                let maxOrder = 0;
-                selectedRoles.forEach(role => { const order = getRoleOrder(role); if (order > maxOrder) maxOrder = order; });
-                if (maxOrder === 0) return 0;
-                for (let i = 0; i < maxOrder; i++) { 
-                    const roleName = currentRoleOrder[i]; 
-                    total += ROLE_DRAWS_CONFIG[currentScheme][roleName]; 
-                }
-                if (monthCard.checked && maxOrder > 0) {
-                    const totalDays = maxOrder * CARD_POOL_DAYS;
-                    const monthCardTotalJade = totalDays * MONTH_CARD_DAILY_JADE;
-                    const monthCardDraws = Math.floor(monthCardTotalJade / 500);
-                    total += monthCardDraws;
-                }
-                return total;
-            }
+    // 二次元关键词库（中/英/日/韩）
+    const DEFAULT_KEYWORDS = [
+    // ===== 米哈游全系 =====
+    "原神", "Genshin Impact", "原神", "원신",
+    "崩坏3", "Honkai Impact 3rd", "崩壊3rd", "붕괴3rd",
+    "崩坏：星穹铁道", "Honkai: Star Rail", "崩壊：スターレイル", "붕괴: 스타레일",
+    "绝区零", "Zenless Zone Zero", "ゼンレスゾーンゼロ", "젠레스 존 제로",
+    "崩坏学园2", "Guns GirlZ", "ガールズガン", "붕괴학원2",
+    "未定事件簿", "Tears of Themis", "未定事件簿", "미해결사건부",
 
-            function calculateExpectRate(totalDraws, expectDrawsValue, requiredDrawsValue) {
-                if (expectDrawsValue <= 0) return '0.0%';
-                let rate = (totalDraws / expectDrawsValue) * 100;
-                const maxRate = (requiredDrawsValue / expectDrawsValue) * 100;
-                if (rate > maxRate) rate = maxRate;
-                return rate.toFixed(1) + '%';
-            }
+    // ===== 鹰角网络 =====
+    "明日方舟", "Arknights", "アークナイツ", "명일방주",
+    "明日方舟：终末地", "Arknights: Endfield", "アークナイツ：エンドフィールド", "명일방주: 엔드필드",
+    "来自星尘", "Ex Astris", "エクス・アストリ스", "엑스 아스트리스",
+    "泡姆泡姆", "Popucom", "ポプコム", "포푸콤",
 
-            function renderRoleCards() {
-                roleCardsContainer.innerHTML = '';
-                const currentRoleOrder = ORDER_SCHEMES[currentScheme];
-                currentRoleOrder.forEach(roleName => {
-                    const isChecked = roleCheckedStatus[roleName];
-                    const avatarUrl = ROLE_AVATAR_CONFIG[roleName];
-                    const roleDraws = ROLE_DRAWS_CONFIG[currentScheme][roleName];
-                    const card = document.createElement('div');
-                    card.className = `role-card border border-gray-200 rounded-xl p-3 text-center cursor-pointer transition-all hover:shadow-md bg-white/70 ${isChecked ? 'role-card-active' : ''}`;
-                    card.dataset.role = roleName;
-                    card.innerHTML = `
-                        <div class="w-16 h-16 mx-auto mb-2 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center overflow-hidden shadow-sm">
-                            <img src="${avatarUrl}" alt="${roleName}" data-role="${roleName}" class="w-full h-full object-cover avatar-hover" onerror="this.onerror=null; this.parentElement.innerHTML='<span class=\'text-2xl font-bold text-secondary\'>${roleName.slice(0,2)}</span>';">
-                        </div>
-                        <input type="checkbox" id="role-${roleName}" class="role-checkbox hidden" ${isChecked ? 'checked' : ''}>
-                        <label for="role-${roleName}" class="cursor-pointer text-sm font-semibold block">${roleName}<br><span class="text-gray-500 text-xs font-normal">+${roleDraws}抽</span></label>
-                        <button class="role-info mt-1 text-gray-400 hover:text-secondary transition">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                        </button>
-                    `;
-                    roleCardsContainer.appendChild(card);
-                    card.addEventListener('click', function(e) {
-                        if (e.target.closest('.role-info')) {
-                            modalTitle.textContent = `${roleName} · 角色详情`;
-                            modalContent.textContent = ROLE_CONFIGS[roleName].info;
-                            infoModal.classList.remove('hidden');
-                            return;
-                        }
-                        const checkbox = document.getElementById(`role-${roleName}`);
-                        checkbox.checked = !checkbox.checked;
-                        roleCheckedStatus[roleName] = checkbox.checked;
-                        checkbox.checked ? card.classList.add('role-card-active') : card.classList.remove('role-card-active');
-                        calculateResult();
-                    });
-                });
-            }
+    // ===== 悠星 / Nexon =====
+    "碧蓝航线", "Azur Lane", "アズールレーン", "벽람항로",
+    "蔚蓝档案", "Blue Archive", "ブルーアーカイブ", "블루 아카이브",
+    "雀魂麻将", "Mahjong Soul", "雀魂麻将", "작혼 마작",
 
-            function calculateResult() {
-                const currentDrawsValue = Math.floor(jadeValue / 500);
-                const futureDrawsValue = calculateFutureDraws();
-                const totalDrawsValue = currentDrawsValue + futureDrawsValue;
-                const selectedRoles = Object.keys(roleCheckedStatus).filter(role => roleCheckedStatus[role]);
-                const selectedCount = selectedRoles.length;
-                const requiredDrawsValue = selectedCount * DRAWS_PER_ROLE_GUARANTEE;
-                const expectDrawsValue = selectedCount * DRAWS_PER_ROLE_EXPECT;
-                const expectRateValue = calculateExpectRate(totalDrawsValue, expectDrawsValue, requiredDrawsValue);
-                
-                currentDraws.textContent = `${formatThousand(currentDrawsValue)} 抽`;
-                currentJade.textContent = `（${formatThousand(jadeValue)} 嵌晶玉）`;
-                futureDraws.textContent = `${formatThousand(futureDrawsValue)} 抽`;
-                let futureDescText = `（按方案${currentScheme} 顺序累加 ${futureResource.checked ? '✓' : '未计入'}`;
-                if (monthCard.checked && futureResource.checked) futureDescText += ' + 月卡收益';
-                futureDescText += '）';
-                futureDesc.textContent = futureDescText;
-                requiredDraws.textContent = `${formatThousand(requiredDrawsValue)} 抽`;
-                requiredDesc.textContent = `（${selectedCount}个角色 × 120抽/角色）`;
-                expectDraws.textContent = `${formatThousand(expectDrawsValue.toFixed(1))} 抽`;
-                expectDesc.textContent = `（${selectedCount}个角色 × 79.7抽/角色）`;
-                expectRate.textContent = `达成率：${expectRateValue}`;
-                
-                const gapRequired = requiredDrawsValue - totalDrawsValue;
-                const gapExpect = expectDrawsValue - totalDrawsValue;
+    // ===== 库洛游戏 =====
+    "战双帕弥什", "Punishing: Gray Raven", "パニシング：グレイレイヴン", "퍼니싱: 그레이 레이븐",
+    "鸣潮", "Wuthering Waves", "鳴潮", "명조: 워더링 웨이브",
+    "二重螺旋", "Binary Trigger", "二重螺旋", "이중나선",
 
-                if (selectedCount === 0) {
-                    conclusionText.textContent = "✨ 请选择目标角色后重新测算";
-                    conclusionText.className = "text-gray-500 text-lg";
-                    gapDetail.textContent = ""; expectGapDetail.textContent = "";
-                    suggestionText.textContent = "选取心仪角色，系统将自动规划抽卡策略";
-                    conclusionCard.className = "rounded-xl p-5 mb-6 text-center bg-white/50 border border-gray-200"; return;
-                }
-                if (jadeValue === 0 && currentDrawsValue === 0 && futureDrawsValue === 0 && selectedCount>0) {
-                    conclusionText.textContent = "📭 当前嵌晶玉为0，请先输入数量";
-                    conclusionText.className = "text-gray-500 text-lg";
-                    gapDetail.textContent = ""; expectGapDetail.textContent = "";
-                    suggestionText.textContent = "输入现有嵌晶玉数量，获取精准资源评估";
-                    conclusionCard.className = "rounded-xl p-5 mb-6 text-center bg-amber-50/60 border border-amber-200"; return;
-                }
-                
-                if (totalDrawsValue >= requiredDrawsValue) {
-                    conclusionText.textContent = "🎉 资源充足！可100%获取所有选中角色";
-                    conclusionText.className = "text-green-700 text-lg font-semibold";
-                    gapDetail.textContent = `✨ 超出保底所需：${formatThousand(Math.abs(gapRequired))} 抽（≈ ${formatThousand(Math.abs(gapRequired) * 500)} 嵌晶玉）`;
-                    expectGapDetail.textContent = `📈 超出期望所需：${formatThousand(Math.abs(gapExpect).toFixed(1))} 抽（≈ ${formatThousand(Math.floor(Math.abs(gapExpect) * 500))} 嵌晶玉）`;
-                    conclusionCard.className = "rounded-xl p-5 mb-6 text-center border border-green-300 bg-green-50/70";
-                    suggestionText.textContent = "✓ 资源充沛，优先拿下核心角色，剩余资源可屯给未来人权卡。";
-                } else if (totalDrawsValue >= expectDrawsValue) {
-                    conclusionText.textContent = "✅ 资源达标！按数学期望可获取所有角色（保底存在缺口）";
-                    conclusionText.className = "text-blue-700 text-lg font-semibold";
-                    gapDetail.textContent = `🛡️ 保底缺口：${formatThousand(Math.abs(gapRequired))} 抽（≈ ${formatThousand(Math.abs(gapRequired) * 500)} 嵌晶玉）`;
-                    expectGapDetail.textContent = `🎲 超出期望：${formatThousand(Math.abs(gapExpect).toFixed(1))} 抽（≈ ${formatThousand(Math.floor(Math.abs(gapExpect) * 500))} 嵌晶玉）`;
-                    conclusionCard.className = "rounded-xl p-5 mb-6 text-center border border-blue-300 bg-blue-50/70";
-                    suggestionText.textContent = "建议按照期望抽法，适当完成日常/周常填补少量保底差额即可。";
-                } else {
-                    conclusionText.textContent = "⚠️ 资源紧张！获取全部角色存在较大风险";
-                    conclusionText.className = "text-red-700 text-lg font-semibold";
-                    gapDetail.textContent = `❗ 保底缺口：${formatThousand(Math.abs(gapRequired))} 抽（≈ ${formatThousand(Math.abs(gapRequired) * 500)} 嵌晶玉）`;
-                    expectGapDetail.textContent = `📉 期望缺口：${formatThousand(Math.abs(gapExpect).toFixed(1))} 抽（≈ ${formatThousand(Math.floor(Math.abs(gapExpect) * 500))} 嵌晶玉）`;
-                    conclusionCard.className = "rounded-xl p-5 mb-6 text-center border border-red-300 bg-red-50/70";
-                    suggestionText.textContent = "建议缩减目标角色数量，优先抽取性价比最高的核心，或等待更多福利活动。";
-                }
-            }
+    // ===== 散爆网络 =====
+    "少女前线", "Girls' Frontline", "ドールズフロントライン", "소녀전선",
+    "少女前线：云图计划", "Girls' Frontline: Neural Cloud", "ドールズフロントライン：ニューラルクラウド", "소녀전선: 뉴럴 클라우드",
+    "少女前线2：追放", "Girls' Frontline 2: Exilium", "ドールズフロントライン2：エキ실리움", "소녀전선2: 엑실리움",
 
-            jadeInput.addEventListener('input', function() {
-                this.value = this.value.replace(/[^0-9]/g, '');
-                inputError.classList.add('hidden');
-                jadeValue = this.value ? parseInt(this.value, 10) : 0;
-                calculateResult();
-            });
-            orderSchemeRadios.forEach(radio => {
-                radio.addEventListener('change', function() {
-                    currentScheme = this.value;
-                    document.querySelectorAll('.card-order-option').forEach(opt => opt.classList.remove('radio-active'));
-                    this.closest('.card-order-option').classList.add('radio-active');
-                    renderRoleCards(); calculateResult();
-                });
-            });
-            futureResource.addEventListener('change', calculateResult);
-            monthCard.addEventListener('change', calculateResult);
-            resetBtn.addEventListener('click', function() {
-                jadeInput.value = ''; jadeValue = 0;
-                roleCheckedStatus = { '洛茜': false, '弭弗': false, '庄方宜': false, '李芷妍': false, '卡缪': false };
-                currentScheme = '1';
-                document.querySelectorAll('input[name="orderScheme"]').forEach(radio => radio.checked = radio.value === '1');
-                document.querySelectorAll('.card-order-option').forEach(opt => opt.classList.remove('radio-active'));
-                document.querySelector('input[name="orderScheme"][value="1"]').closest('.card-order-option').classList.add('radio-active');
-                futureResource.checked = true; monthCard.checked = false;
-                renderRoleCards(); calculateResult(); inputError.classList.add('hidden');
-            });
-            closeModal.addEventListener('click', () => infoModal.classList.add('hidden'));
-            infoModal.addEventListener('click', e => { if(e.target === infoModal) infoModal.classList.add('hidden'); });
-            document.querySelector('input[name="orderScheme"][value="1"]').closest('.card-order-option').classList.add('radio-active');
-            renderRoleCards(); calculateResult();
+    // ===== 叠纸游戏 =====
+    "恋与制作人", "Mr. Love: Queen's Choice", "恋とプロデューサー", "러브앤프로듀서",
+    "恋与深空", "Love and Deepspace", "ラブアンドディープスペース", "러브 앤 딥스페이스",
+    "闪耀暖暖", "Shining Nikki", "シャイニングニキ", "샤이닝 니키",
+    "无限暖暖", "Infinity Nikki", "インフィニティニキ", "인피니티 니키",
+
+    // ===== 网易二游 =====
+    "阴阳师", "Onmyoji", "陰陽師", "음양사",
+    "决战！平安京", "Onmyoji Arena", "決戦！平安京", "결전! 평안경",
+    "阴阳师：百闻牌", "Onmyoji: The Card Game", "陰陽師：百鬼異聞牌", "음양사: 백문패",
+    "阴阳师：妖怪屋", "Onmyoji: Yokai Koya", "陰陽師：妖怪屋", "음양사: 요괴집",
+    "忘川风华录", "Wang Chuan Feng Hua Lu", "忘川風華録", "망천풍화록",
+    "永远的7日之都", "Forever 7th Capital", "永遠の7日之都", "영원의 7일之都",
+    "非人学园", "Extraordinary Ones", "非人学園", "비인학원",
+
+    // ===== 腾讯 / 其他大厂二游 =====
+    "白夜极光", "Alchemy Stars", "白夜極光", "백야극광",
+    "龙族：卡塞尔之门", "Dragon Raja: Cassell Gate", "龍族：カッセル門", "용족: 카셀문",
+
+    // ===== 经典老牌二游 =====
+    "FGO", "Fate/Grand Order", "Fate/Grand Order", "페이트/그랜드 오더",
+    "公主连结", "Princess Connect! Re:Dive", "プリンセスコネクト！Re:Dive", "프린세스 커넥트! Re:Dive",
+    "刀剑乱舞", "Touken Ranbu", "刀剣乱舞", "도검난무",
+    "偶像梦幻祭2", "Ensemble Stars!! Music", "あんさんぶるスターズ！！ミュージック", "앙상블 스타즈!! 뮤직",
+    "Love Live! 学园偶像祭", "Love Live! School Idol Festival", "ラブライブ！スクールアイドルフェスティバル", "러브라이브! 스쿨 아이돌 페스티벌",
+    "战舰少女R", "Warship Girls R", "ウォーシップガールズR", "군함소녀R",
+    "螺旋圆舞曲", "Helix Waltz", "ヘリックスワルツ", "헬릭스 왈츠",
+
+    // ===== 近年新二游 =====
+    "重返未来：1999", "Reverse: 1999", "リバース：1999", "리버스: 1999",
+    "异环", "Neverness to Everness", "異環", "이환",
+    "无期迷途", "Path to Nowhere", "無期迷途", "패스 투 나우웨어",
+    "铃兰之剑", "Sword of Convallaria", "スズランの剣", "은방울꽃의 검",
+    "千年之旅", "Echocalypse", "エコカリプス", "에코칼립스",
+    "交错战线", "Frontier Cross", "交錯戦線", "교차전선",
+    "依露希尔：星晓", "Echocalypse", "エコカリプス", "에코칼립스",
+    "深空之眼", "Aether Gazer", "エーテルゲイザー", "에이더 게이저",
+    "幻塔", "Tower of Fantasy", "Tower of Fantasy", "타워 오브 판타지",
+    "灵魂潮汐", "Soul Tide", "ソウルタイド", "소울타이드",
+    "悠久之树", "Eternal Tree", "悠久の樹", "유구의 나무",
+    "苍翼：混沌效应", "BlazBlue: Entropy Effect", "ブレイブルー：エントロピーエフェクト", "블레이블루: 엔트로피 이펙트",
+    "雾境序列", "Mist Sequence", "霧境序列", "안개순서",
+    "环行旅舍", "Circle Traveler", "サークルトラベラー", "순환여관",
+    "斯露德", "Thrud", "スルッド", "스루드",
+    "彼界", "The Lost Land", "彼の界", "피계",
+    "行界", "Xingjie", "行界", "행계",
+    "异象回声", "Echoes of Anomaly", "異象エコー", "이상에코",
+    "暗号：瞳", "Cipher: Eye", "暗号：瞳", "암호: 동",
+    "蓝色星原：旅谣", "Blue Star: Travel Ballad", "蒼き星原：旅謡", "푸른성원: 여요",
+
+    // ===== 女性向 / 乙女二游 =====
+    "光与夜之恋", "Light and Night", "光と夜の恋", "빛과 밤의 사랑",
+    "时空中的绘旅人", "Lovebrush Chronicles", "時空の絵旅人", "다시 그리는 시간",
+    "世界之外", "Beyond the World", "世界の外", "세계밖에서",
+    "代号鸢", "Code: Kite", "コード：カイト", "코드: 연",
+    "花亦山心之月", "Hua Yi Shan", "花亦山心之月", "화역산심지월",
+    "掌门太忙", "Headmaster is Too Busy", "掌门は忙しい", "주인님은 너무 바빠",
+
+    // ===== 其他有共识二游 =====
+    "高能手办团", "Figure Story", "ハンドメイドフィギュア団", "고능수반단",
+    "山海镜花", "Shan Hai Jing Hua", "山海鏡花", "산해경화",
+    "大王不高兴", "The Monkey King: Uproar in Heaven", "大王不高興", "대왕불고흥",
+    "空匣人型", "Empty Frame", "空匣人型", "공갑인형",
+    "灰烬战线", "Ash Arms", "アッシュアームズ", "애쉬 아머즈",
+    "湮灭效应", "Annihilation Effect", "消滅効果", "소멸효과",
+    "潘多拉的回响", "Pandora's Echo", "パンドラの反響", "판도라의 반향",
+    "银翼计划", "Silver Wing Plan", "銀翼計画", "은익계획",
+    "苍蓝誓约", "Azure Oath", "蒼藍誓約", "창람서약",
+    "深渊地平线", "Abyss Horizon", "アビスホライズン", "어비스 호라이즌",
+    "拂晓：胜利之刻", "Daybreak", "フォーダウン", "여명: 승리의 순간",
+    "战火使命", "Mission of War", "戦火使命", "전화사명",
+    "300大作战", "300 Heroes", "300ヒーローズ", "300 대작전",
+    "阿卡夏计划", "Project Akasha", "アカシャ計画", "아카샤 프로젝트",
+    "胜利女神：妮姬", "GODDESS OF VICTORY: NIKKE", "勝利の女神：NIKKE", "승리의 여신: 니케",
+    "闪耀！优俊少女", "Umamusume: Pretty Derby", "ウマ娘 プリティーダービー", "우마무스메 프리티 더비",
+];
+
+    // 从本地存储读取关键词
+    function getKeywordList() {
+        const stored = localStorage.getItem('anime_keywords');
+        if (stored) { try { return JSON.parse(stored); } catch(e){} }
+        return [...DEFAULT_KEYWORDS];
+    }
+
+    function saveKeywordList(list) {
+        localStorage.setItem('anime_keywords', JSON.stringify(list));
+    }
+
+    const countrySelect = document.getElementById('countrySelect');
+    const chartSelect = document.getElementById('chartSelect');
+    const animeCheckbox = document.getElementById('animeFilter');
+    const extendCheck = document.getElementById('extendCheck');
+    const statusDiv = document.getElementById('status');
+    const rankContainer = document.getElementById('rankContainer');
+    const editListBtn = document.getElementById('editListBtn');
+    const animeListEditor = document.getElementById('animeListEditor');
+    const animeListText = document.getElementById('animeListText');
+    const saveListBtn = document.getElementById('saveListBtn');
+    const closeListBtn = document.getElementById('closeListBtn');
+
+    let allEntries = [];
+    let top100Entries = [];
+    let currentKeywords = getKeywordList();
+
+    function buildURL(country, chartType, genre, limit = 100) {
+        const path = chartType === 'topgrossing' ? 'topgrossingapplications' : 'toppaidapplications';
+        return `https://itunes.apple.com/${country}/rss/${path}/limit=${limit}/genre=${genre}/json`;
+    }
+
+    async function fetchGenre(url) {
+        try {
+            const resp = await fetch(url);
+            if (!resp.ok) return [];
+            const data = await resp.json();
+            return data.feed?.entry || [];
+        } catch { return []; }
+    }
+
+    function getAppId(entry) { return entry['id']?.attributes?.['im:id'] || ''; }
+    function getAppName(entry) { return entry['im:name']?.label || ''; }
+
+    function extractAppInfo(entry) {
+        const name = getAppName(entry);
+        const developer = entry['im:artist']?.label || '';
+        const appId = getAppId(entry);
+        const images = entry['im:image'];
+        const icon = images?.length >= 3 ? images[2].label : (images?.[0]?.label || '');
+        const priceLabel = entry['im:price']?.label || '';
+        const priceAmount = entry['im:price']?.attributes?.amount || '0';
+        let displayPrice = priceLabel;
+        if (priceAmount === '0.00' || priceLabel === '获取') displayPrice = '免费';
+        return { name, developer, appId, icon, displayPrice };
+    }
+
+    // 包含匹配（忽略大小写）
+    function isAnimeGameByName(name) {
+        const lowerName = name.toLowerCase();
+        return currentKeywords.some(kw => lowerName.includes(kw.toLowerCase()));
+    }
+
+    function renderList(entries, extended = false) {
+        rankContainer.innerHTML = '';
+        if (entries.length === 0) {
+            rankContainer.innerHTML = '<div class="status">😴 没有符合条件的结果</div>';
+            return;
+        }
+        entries.forEach((entry, index) => {
+            const info = extractAppInfo(entry);
+            const rank = index + 1;
+            let rankClass = 'rank-number';
+            if (rank <= 3) rankClass += ' top3';
+            if (extended && rank > 100) rankClass += ' warning';
+
+            const card = document.createElement('a');
+            card.className = 'rank-item';
+            card.href = info.appId ? `https://apps.apple.com/cn/app/id${info.appId}` : '#';
+            card.target = '_blank';
+            card.innerHTML = `
+                <div class="${rankClass}">${rank}</div>
+                <img class="app-icon" src="${info.icon}" alt="" loading="lazy" 
+                     onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2264%22 height=%2264%22><rect fill=%22%23e0e0e0%22 width=%2264%22 height=%2264%22 rx=%2216%22/></svg>'">
+                <div class="app-info">
+                    <div class="app-name">${escapeHtml(info.name)}</div>
+                    <div class="app-developer">${escapeHtml(info.developer)}</div>
+                </div>
+                <div class="app-price ${info.displayPrice === '免费' ? 'free' : ''}">${escapeHtml(info.displayPrice)}</div>
+            `;
+            rankContainer.appendChild(card);
         });
-    </script>
+    }
+
+    function applyFilterAndRender() {
+        let display = allEntries;
+        if (animeCheckbox.checked) {
+            display = allEntries.filter(entry => isAnimeGameByName(getAppName(entry)));
+        }
+        const isExtended = extendCheck.checked && allEntries.length > 100;
+        let msg = `✅ 共 ${display.length} 款游戏`;
+        if (isExtended && display.length > 100) {
+            msg += ' | 100名后排名仅供参考';
+        }
+        statusDiv.textContent = msg;
+        renderList(display, isExtended);
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    async function loadAllData() {
+        const country = countrySelect.value;
+        const chart = chartSelect.value;
+        const extend = extendCheck.checked;
+
+        statusDiv.textContent = '⏳ 正在拉取总榜前100...';
+        rankContainer.innerHTML = '';
+
+        const totalUrl = buildURL(country, chart, TOTAL_GENRE, 100);
+        top100Entries = await fetchGenre(totalUrl);
+
+        if (!extend) {
+            allEntries = top100Entries;
+            statusDiv.textContent = '';
+            applyFilterAndRender();
+            return;
+        }
+
+        statusDiv.textContent = '⏳ 正在拉取子品类补充数据...';
+        const top100Ids = new Set(top100Entries.map(getAppId).filter(Boolean));
+        const subRequests = SUB_GENRES.map(genre => fetchGenre(buildURL(country, chart, genre, 100)));
+        const subResults = await Promise.all(subRequests);
+
+        const merged = [...top100Entries];
+        const seenIds = new Set(top100Ids);
+        for (const subEntries of subResults) {
+            for (const entry of subEntries) {
+                const id = getAppId(entry);
+                if (!id || seenIds.has(id)) continue;
+                seenIds.add(id);
+                merged.push(entry);
+            }
+        }
+        allEntries = merged;
+        statusDiv.textContent = '';
+        applyFilterAndRender();
+    }
+
+    // 关键词编辑器
+    function openEditor() {
+        animeListText.value = currentKeywords.join('\n');
+        animeListEditor.style.display = 'block';
+    }
+    function closeEditor() { animeListEditor.style.display = 'none'; }
+    function saveEditor() {
+        const lines = animeListText.value.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+        currentKeywords = lines;
+        saveKeywordList(currentKeywords);
+        closeEditor();
+        applyFilterAndRender();
+    }
+
+    editListBtn.addEventListener('click', openEditor);
+    saveListBtn.addEventListener('click', saveEditor);
+    closeListBtn.addEventListener('click', closeEditor);
+
+    countrySelect.addEventListener('change', loadAllData);
+    chartSelect.addEventListener('change', loadAllData);
+    animeCheckbox.addEventListener('change', applyFilterAndRender);
+    extendCheck.addEventListener('change', loadAllData);
+
+    // 页面加载时自动使用中国区数据
+    loadAllData();
+</script>
 </body>
 </html>
