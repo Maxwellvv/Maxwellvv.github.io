@@ -1,400 +1,645 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>苹果游戏排行榜 - 准确前100 + 可选补充</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>苹果游戏排行榜</title>
+    <link rel="icon" type="image/png" href="ODF.png">
     <style>
         :root {
-            --bg: #f5f5f7; --card-bg: #fff; --text: #1d1d1f;
-            --text-secondary: #86868b; --accent: #0071e3; --border: #d2d2d7;
-            --shadow: 0 2px 12px rgba(0,0,0,0.06);
+            --bg: #f5f5f7;
+            --card-bg: #fff;
+            --text: #1d1d1f;
+            --text-secondary: #86868b;
+            --accent: #0071e3;
+            --border: #d2d2d7;
+            --shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+            --header-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
         }
-        * { margin:0; padding:0; box-sizing:border-box; }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background: var(--bg); color: var(--text); min-height: 100vh; padding: 2rem 1rem;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
         }
-        .container { max-width: 860px; margin: 0 auto; }
-        header { text-align: center; margin-bottom: 2rem; }
-        header h1 { font-size: 2.2rem; font-weight: 700; margin-bottom: 0.3rem; }
-        .subtitle { font-size: 0.95rem; color: var(--text-secondary); }
-        .controls {
-            display: flex; justify-content: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;
+
+        /* ===== 全宽贴顶标题栏 ===== */
+        .sticky-header {
+            position: sticky;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: saturate(180%) blur(12px);
+            -webkit-backdrop-filter: saturate(180%) blur(12px);
+            box-shadow: var(--header-shadow);
+            padding: 0.9rem 1.5rem;
+            display: flex;
+            flex-direction: column;
             align-items: center;
+            gap: 0.5rem;
         }
+
+        .sticky-header .header-inner {
+            max-width: 860px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .sticky-header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: var(--text);
+            line-height: 1.2;
+        }
+
+        .sticky-header .subtitle {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.6rem 1rem;
+            align-items: center;
+            width: 100%;
+            padding-top: 0.2rem;
+        }
+
         .control-group {
-            display: flex; align-items: center; background: var(--card-bg);
-            border-radius: 12px; padding: 0.5rem 1rem; box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 0.3rem 0.9rem;
+            box-shadow: var(--shadow);
+            font-size: 0.9rem;
         }
-        .control-group label { font-weight: 600; margin-right: 0.5rem; color: var(--text-secondary); }
-        select { border: 1px solid var(--border); border-radius: 8px; padding: 0.4rem 0.8rem; font-size: 1rem; }
+
+        .control-group label {
+            font-weight: 600;
+            margin-right: 0.4rem;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .control-group select {
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 0.25rem 0.6rem;
+            font-size: 0.85rem;
+            font-family: inherit;
+            background: #fff;
+            color: var(--text);
+            outline: none;
+            cursor: pointer;
+        }
+
+        .control-group select:focus {
+            border-color: var(--accent);
+        }
+
         .check-box {
-            display: flex; align-items: center; background: var(--card-bg);
-            border-radius: 12px; padding: 0.5rem 1.2rem; box-shadow: var(--shadow);
-            gap: 0.4rem; font-weight: 500; cursor: pointer;
+            display: flex;
+            align-items: center;
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 0.3rem 1rem;
+            box-shadow: var(--shadow);
+            gap: 0.4rem;
+            font-weight: 500;
+            font-size: 0.85rem;
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
         }
-        .check-box input { width: 18px; height: 18px; cursor: pointer; }
-        .status { text-align: center; padding: 1.5rem; color: var(--text-secondary); }
-        .rank-list { display: flex; flex-direction: column; gap: 0.75rem; }
+
+        .check-box input {
+            width: 17px;
+            height: 17px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        /* ===== 容器 ===== */
+        .container {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 1.2rem 1rem 2rem;
+        }
+
+        /* ===== 状态 & 列表 ===== */
+        .status {
+            text-align: center;
+            padding: 1.2rem 0;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .rank-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.7rem;
+        }
+
         .rank-item {
-            display: flex; align-items: center; gap: 1rem; background: var(--card-bg);
-            border-radius: 16px; padding: 0.8rem 1.2rem; box-shadow: var(--shadow);
-            text-decoration: none; color: inherit; transition: transform 0.15s, box-shadow 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: var(--card-bg);
+            border-radius: 14px;
+            padding: 0.7rem 1.1rem;
+            box-shadow: var(--shadow);
+            text-decoration: none;
+            color: inherit;
+            transition: transform 0.15s, box-shadow 0.15s;
         }
-        .rank-item:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
-        .rank-number { font-size: 1.5rem; font-weight: 700; min-width: 2.2rem; text-align: center; }
-        .rank-number.top3 { color: var(--accent); }
-        .app-icon { width: 64px; height: 64px; border-radius: 16px; background: #f0f0f0; }
-        .app-info { flex: 1; min-width: 0; }
-        .app-name { font-weight: 600; font-size: 1.1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .app-developer { font-size: 0.9rem; color: var(--text-secondary); }
-        .app-price { font-weight: 600; font-size: 1rem; color: var(--accent); min-width: 4rem; text-align: right; }
-        .app-price.free { color: #34c759; }
-        .edit-list { text-align: center; margin-top: 1rem; }
-        .edit-list button { margin: 0 0.5rem; padding: 0.4rem 1rem; border-radius: 8px; border: 1px solid var(--border); background: white; cursor: pointer; }
-        .anime-list-box { display: none; background: white; border-radius: 12px; padding: 1rem; margin-top: 1rem; box-shadow: var(--shadow); text-align: left; max-height: 200px; overflow-y: auto; }
-        .anime-list-box textarea { width: 100%; height: 150px; font-family: monospace; font-size: 0.9rem; }
-        .warning { color: #ff9500; font-weight: 500; }
+
+        .rank-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.10);
+        }
+
+        .rank-number {
+            font-size: 1.4rem;
+            font-weight: 700;
+            min-width: 2rem;
+            text-align: center;
+            flex-shrink: 0;
+            color: var(--text-secondary);
+        }
+
+        .rank-number.top3 {
+            color: var(--accent);
+        }
+
+        .app-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            background: #f0f0f0;
+            flex-shrink: 0;
+            object-fit: cover;
+        }
+
+        .app-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .app-name {
+            font-weight: 600;
+            font-size: 1.05rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .app-developer {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .app-price {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--accent);
+            min-width: 3.6rem;
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .app-price.free {
+            color: #34c759;
+        }
+
+        /* ===== 响应式 ===== */
+        @media (max-width: 640px) {
+            .sticky-header {
+                padding: 0.6rem 0.8rem;
+                gap: 0.3rem;
+            }
+
+            .sticky-header h1 {
+                font-size: 1.4rem;
+            }
+
+            .sticky-header .subtitle {
+                font-size: 0.8rem;
+            }
+
+            .controls {
+                gap: 0.4rem 0.6rem;
+            }
+
+            .control-group {
+                padding: 0.2rem 0.6rem;
+                font-size: 0.8rem;
+            }
+
+            .control-group select {
+                font-size: 0.78rem;
+                padding: 0.15rem 0.4rem;
+            }
+
+            .check-box {
+                padding: 0.2rem 0.7rem;
+                font-size: 0.78rem;
+            }
+
+            .check-box input {
+                width: 15px;
+                height: 15px;
+            }
+
+            .rank-item {
+                padding: 0.5rem 0.8rem;
+                gap: 0.6rem;
+                border-radius: 12px;
+            }
+
+            .rank-number {
+                font-size: 1.1rem;
+                min-width: 1.6rem;
+            }
+
+            .app-icon {
+                width: 44px;
+                height: 44px;
+                border-radius: 11px;
+            }
+
+            .app-name {
+                font-size: 0.9rem;
+            }
+
+            .app-developer {
+                font-size: 0.75rem;
+            }
+
+            .app-price {
+                font-size: 0.85rem;
+                min-width: 3rem;
+            }
+
+            .container {
+                padding: 0.8rem 0.6rem 1.5rem;
+            }
+
+            .status {
+                padding: 0.8rem 0;
+                font-size: 0.85rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sticky-header h1 {
+                font-size: 1.2rem;
+            }
+
+            .control-group {
+                padding: 0.15rem 0.5rem;
+                font-size: 0.7rem;
+            }
+
+            .control-group select {
+                font-size: 0.7rem;
+                padding: 0.1rem 0.3rem;
+            }
+
+            .check-box {
+                padding: 0.15rem 0.5rem;
+                font-size: 0.7rem;
+            }
+
+            .check-box input {
+                width: 14px;
+                height: 14px;
+            }
+
+            .rank-number {
+                font-size: 0.95rem;
+                min-width: 1.4rem;
+            }
+
+            .app-icon {
+                width: 38px;
+                height: 38px;
+                border-radius: 10px;
+            }
+
+            .app-name {
+                font-size: 0.8rem;
+            }
+
+            .app-developer {
+                font-size: 0.7rem;
+            }
+
+            .app-price {
+                font-size: 0.75rem;
+                min-width: 2.6rem;
+            }
+        }
     </style>
 </head>
 <body>
-<div class="container">
-    <header>
-        <h1>🎮 苹果游戏排行榜</h1>
-        <div class="subtitle">前100为官方准确排名，可手动开启品类补充（排名不准）</div>
+
+    <!-- ===== 全宽贴顶标题栏 ===== -->
+    <header class="sticky-header">
+        <div class="header-inner">
+            <h1>苹果游戏排行榜</h1>
+
+            <div class="controls">
+                <div class="control-group">
+                    <label>地区</label>
+                    <select id="countrySelect">
+                        <option value="cn" selected>中国</option>
+                        <option value="us">美国</option>
+                        <option value="jp">日本</option>
+                        <option value="kr">韩国</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label>榜单</label>
+                    <select id="chartSelect">
+                        <option value="topgrossing">畅销榜 (收入)</option>
+                        <option value="toppaid">付费下载榜</option>
+                    </select>
+                </div>
+
+                <label class="check-box">
+                    <input type="checkbox" id="animeFilter" />
+                    <span>只显示二次元游戏</span>
+                </label>
+            </div>
+        </div>
     </header>
 
-    <div class="controls">
-        <div class="control-group">
-            <label>🌍 地区</label>
-            <select id="countrySelect">
-                <option value="cn" selected>中国</option>
-                <option value="us">美国</option>
-                <option value="jp">日本</option>
-                <option value="kr">韩国</option>
-            </select>
-        </div>
-        <div class="control-group">
-            <label>📊 榜单</label>
-            <select id="chartSelect">
-                <option value="topgrossing">畅销榜 (收入)</option>
-                <option value="toppaid">付费下载榜</option>
-            </select>
-        </div>
-        <label class="check-box">
-            <input type="checkbox" id="animeFilter">
-            <span>只显示二次元游戏（名称含关键词）</span>
-        </label>
-        <label class="check-box">
-            <input type="checkbox" id="extendCheck">
-            <span>包含子品类补充 <span class="warning">(100名后不准)</span></span>
-        </label>
+    <!-- ===== 内容区 ===== -->
+    <div class="container">
+        <div id="status" class="status">正在加载...</div>
+        <div id="rankContainer" class="rank-list"></div>
     </div>
 
-    <div id="status" class="status">⏳ 正在拉取总榜前100...</div>
-    <div id="rankContainer" class="rank-list"></div>
+    <script>
+        // ===== 主榜单品类 ID =====
+        const TOTAL_GENRE = 6014;
 
-    <div class="edit-list">
-        <button id="editListBtn">📝 编辑二次元关键词</button>
-    </div>
-    <div id="animeListEditor" class="anime-list-box">
-        <textarea id="animeListText"></textarea>
-        <button id="saveListBtn">💾 保存并应用</button>
-        <button id="closeListBtn">关闭</button>
-    </div>
-</div>
+        // ===== 二次元关键词库（中 / 英 / 日 / 韩） =====
+        const KEYWORDS = [
+            // ----- 米哈游全系 -----
+            "原神", "Genshin Impact", "원신",
+            "崩坏3", "Honkai Impact 3rd", "崩壊3rd", "붕괴3rd",
+            "崩坏：星穹铁道", "Honkai: Star Rail", "崩壊：スターレイル", "붕괴: 스타레일",
+            "绝区零", "Zenless Zone Zero", "ゼンレスゾーンゼロ", "젠레스 존 제로",
+            "崩坏学园2", "Guns GirlZ", "ガールズガン", "붕괴학원2",
+            "未定事件簿", "Tears of Themis", "未定事件簿", "미해결사건부",
 
-<script>
-    // 子品类 ID（仅扩展模式使用）
-    const SUB_GENRES = [7001,7002,7003,7004,7005,7006,7007,7008,7009,7010,7011,7012,7013,7014,7015];
-    const TOTAL_GENRE = 6014;
+            // ----- 鹰角网络 -----
+            "明日方舟", "Arknights", "アークナイツ", "명일방주",
+            "明日方舟：终末地", "Arknights: Endfield", "アークナイツ：エンドフィールド", "명일방주: 엔드필드",
+            "来自星尘", "Ex Astris", "エクス・アストリス", "엑스 아스트리스",
+            "泡姆泡姆", "Popucom", "ポプコム", "포푸콤",
 
-    // 二次元关键词库（中/英/日/韩）
-    const DEFAULT_KEYWORDS = [
-    // ===== 米哈游全系 =====
-    "原神", "Genshin Impact", "原神", "원신",
-    "崩坏3", "Honkai Impact 3rd", "崩壊3rd", "붕괴3rd",
-    "崩坏：星穹铁道", "Honkai: Star Rail", "崩壊：スターレイル", "붕괴: 스타레일",
-    "绝区零", "Zenless Zone Zero", "ゼンレスゾーンゼロ", "젠레스 존 제로",
-    "崩坏学园2", "Guns GirlZ", "ガールズガン", "붕괴학원2",
-    "未定事件簿", "Tears of Themis", "未定事件簿", "미해결사건부",
+            // ----- 悠星 / Nexon -----
+            "碧蓝航线", "Azur Lane", "アズールレーン", "벽람항로",
+            "蔚蓝档案", "Blue Archive", "ブルーアーカイブ", "블루 아카이브",
+            "雀魂麻将", "Mahjong Soul", "雀魂麻将", "작혼 마작",
 
-    // ===== 鹰角网络 =====
-    "明日方舟", "Arknights", "アークナイツ", "명일방주",
-    "明日方舟：终末地", "Arknights: Endfield", "アークナイツ：エンドフィールド", "명일방주: 엔드필드",
-    "来自星尘", "Ex Astris", "エクス・アストリ스", "엑스 아스트리스",
-    "泡姆泡姆", "Popucom", "ポプコム", "포푸콤",
+            // ----- 库洛游戏 -----
+            "战双帕弥什", "Punishing: Gray Raven", "パニシング：グレイレイヴン", "퍼니싱: 그레이 레이븐",
+            "鸣潮", "Wuthering Waves", "鳴潮", "명조: 워더링 웨이브",
+            "二重螺旋", "Binary Trigger", "二重螺旋", "이중나선",
 
-    // ===== 悠星 / Nexon =====
-    "碧蓝航线", "Azur Lane", "アズールレーン", "벽람항로",
-    "蔚蓝档案", "Blue Archive", "ブルーアーカイブ", "블루 아카이브",
-    "雀魂麻将", "Mahjong Soul", "雀魂麻将", "작혼 마작",
+            // ----- 散爆网络 -----
+            "少女前线", "Girls' Frontline", "ドールズフロントライン", "소녀전선",
+            "少女前线：云图计划", "Girls' Frontline: Neural Cloud", "ドールズフロントライン：ニューラルクラウド",
+            "소녀전선: 뉴럴 클라우드",
+            "少女前线2：追放", "Girls' Frontline 2: Exilium", "ドールズフロントライン2：エキシリウム",
+            "소녀전선2: 엑실리움",
 
-    // ===== 库洛游戏 =====
-    "战双帕弥什", "Punishing: Gray Raven", "パニシング：グレイレイヴン", "퍼니싱: 그레이 레이븐",
-    "鸣潮", "Wuthering Waves", "鳴潮", "명조: 워더링 웨이브",
-    "二重螺旋", "Binary Trigger", "二重螺旋", "이중나선",
+            // ----- 叠纸游戏 -----
+            "恋与制作人", "Mr. Love: Queen's Choice", "恋とプロデューサー", "러브앤프로듀서",
+            "恋与深空", "Love and Deepspace", "ラブアンドディープスペース", "러브 앤 딥스페이스",
+            "闪耀暖暖", "Shining Nikki", "シャイニングニキ", "샤이닝 니키",
+            "无限暖暖", "Infinity Nikki", "インフィニティニキ", "인피니티 니키",
 
-    // ===== 散爆网络 =====
-    "少女前线", "Girls' Frontline", "ドールズフロントライン", "소녀전선",
-    "少女前线：云图计划", "Girls' Frontline: Neural Cloud", "ドールズフロントライン：ニューラルクラウド", "소녀전선: 뉴럴 클라우드",
-    "少女前线2：追放", "Girls' Frontline 2: Exilium", "ドールズフロントライン2：エキ실리움", "소녀전선2: 엑실리움",
+            // ----- 网易二游 -----
+            "阴阳师", "Onmyoji", "陰陽師", "음양사",
+            "决战！平安京", "Onmyoji Arena", "決戦！平安京", "결전! 평안경",
+            "阴阳师：百闻牌", "Onmyoji: The Card Game", "陰陽師：百鬼異聞牌", "음양사: 백문패",
+            "阴阳师：妖怪屋", "Onmyoji: Yokai Koya", "陰陽師：妖怪屋", "음양사: 요괴집",
+            "忘川风华录", "Wang Chuan Feng Hua Lu", "忘川風華録", "망천풍화록",
+            "永远的7日之都", "Forever 7th Capital", "永遠の7日之都", "영원의 7일之都",
+            "非人学园", "Extraordinary Ones", "非人学園", "비인학원",
 
-    // ===== 叠纸游戏 =====
-    "恋与制作人", "Mr. Love: Queen's Choice", "恋とプロデューサー", "러브앤프로듀서",
-    "恋与深空", "Love and Deepspace", "ラブアンドディープスペース", "러브 앤 딥스페이스",
-    "闪耀暖暖", "Shining Nikki", "シャイニングニキ", "샤이닝 니키",
-    "无限暖暖", "Infinity Nikki", "インフィニティニキ", "인피니티 니키",
+            // ----- 腾讯 / 其他大厂二游 -----
+            "白夜极光", "Alchemy Stars", "白夜極光", "백야극광",
+            "龙族：卡塞尔之门", "Dragon Raja: Cassell Gate", "龍族：カッセル門", "용족: 카셀문",
 
-    // ===== 网易二游 =====
-    "阴阳师", "Onmyoji", "陰陽師", "음양사",
-    "决战！平安京", "Onmyoji Arena", "決戦！平安京", "결전! 평안경",
-    "阴阳师：百闻牌", "Onmyoji: The Card Game", "陰陽師：百鬼異聞牌", "음양사: 백문패",
-    "阴阳师：妖怪屋", "Onmyoji: Yokai Koya", "陰陽師：妖怪屋", "음양사: 요괴집",
-    "忘川风华录", "Wang Chuan Feng Hua Lu", "忘川風華録", "망천풍화록",
-    "永远的7日之都", "Forever 7th Capital", "永遠の7日之都", "영원의 7일之都",
-    "非人学园", "Extraordinary Ones", "非人学園", "비인학원",
+            // ----- 经典老牌二游 -----
+            "FGO", "Fate/Grand Order", "Fate/Grand Order", "페이트/그랜드 오더",
+            "公主连结", "Princess Connect! Re:Dive", "プリンセスコネクト！Re:Dive", "프린세스 커넥트! Re:Dive",
+            "刀剑乱舞", "Touken Ranbu", "刀剣乱舞", "도검난무",
+            "偶像梦幻祭2", "Ensemble Stars!! Music", "あんさんぶるスターズ！！ミュージック", "앙상블 스타즈!! 뮤직",
+            "Love Live! 学园偶像祭", "Love Live! School Idol Festival", "ラブライブ！スクールアイドルフェスティバル",
+            "러브라이브! 스쿨 아이돌 페스티벌",
+            "战舰少女R", "Warship Girls R", "ウォーシップガールズR", "군함소녀R",
+            "螺旋圆舞曲", "Helix Waltz", "ヘリックスワルツ", "헬릭스 왈츠",
 
-    // ===== 腾讯 / 其他大厂二游 =====
-    "白夜极光", "Alchemy Stars", "白夜極光", "백야극광",
-    "龙族：卡塞尔之门", "Dragon Raja: Cassell Gate", "龍族：カッセル門", "용족: 카셀문",
+            // ----- 近年新二游 -----
+            "重返未来：1999", "Reverse: 1999", "リバース：1999", "리버스: 1999",
+            "异环", "Neverness to Everness", "異環", "이환",
+            "无期迷途", "Path to Nowhere", "無期迷途", "패스 투 나우웨어",
+            "铃兰之剑", "Sword of Convallaria", "スズランの剣", "은방울꽃의 검",
+            "千年之旅", "Echocalypse", "エコカリプス", "에코칼립스",
+            "交错战线", "Frontier Cross", "交錯戦線", "교차전선",
+            "依露希尔：星晓", "Echocalypse", "エコカリプス", "에코칼립스",
+            "深空之眼", "Aether Gazer", "エーテルゲイザー", "에이더 게이저",
+            "幻塔", "Tower of Fantasy", "Tower of Fantasy", "타워 오브 판타지",
+            "灵魂潮汐", "Soul Tide", "ソウルタイド", "소울타이드",
+            "悠久之树", "Eternal Tree", "悠久の樹", "유구의 나무",
+            "苍翼：混沌效应", "BlazBlue: Entropy Effect", "ブレイブルー：エントロピーエフェクト",
+            "블레이블루: 엔트로피 이펙트",
+            "雾境序列", "Mist Sequence", "霧境序列", "안개순서",
+            "环行旅舍", "Circle Traveler", "サークルトラベラー", "순환여관",
+            "斯露德", "Thrud", "スルッド", "스루드",
+            "彼界", "The Lost Land", "彼の界", "피계",
+            "行界", "Xingjie", "行界", "행계",
+            "异象回声", "Echoes of Anomaly", "異象エコー", "이상에코",
+            "暗号：瞳", "Cipher: Eye", "暗号：瞳", "암호: 동",
+            "蓝色星原：旅谣", "Blue Star: Travel Ballad", "蒼き星原：旅謡", "푸른성원: 여요",
 
-    // ===== 经典老牌二游 =====
-    "FGO", "Fate/Grand Order", "Fate/Grand Order", "페이트/그랜드 오더",
-    "公主连结", "Princess Connect! Re:Dive", "プリンセスコネクト！Re:Dive", "프린세스 커넥트! Re:Dive",
-    "刀剑乱舞", "Touken Ranbu", "刀剣乱舞", "도검난무",
-    "偶像梦幻祭2", "Ensemble Stars!! Music", "あんさんぶるスターズ！！ミュージック", "앙상블 스타즈!! 뮤직",
-    "Love Live! 学园偶像祭", "Love Live! School Idol Festival", "ラブライブ！スクールアイドルフェスティバル", "러브라이브! 스쿨 아이돌 페스티벌",
-    "战舰少女R", "Warship Girls R", "ウォーシップガールズR", "군함소녀R",
-    "螺旋圆舞曲", "Helix Waltz", "ヘリックスワルツ", "헬릭스 왈츠",
+            // ----- 女性向 / 乙女二游 -----
+            "光与夜之恋", "Light and Night", "光と夜の恋", "빛과 밤의 사랑",
+            "时空中的绘旅人", "Lovebrush Chronicles", "時空の絵旅人", "다시 그리는 시간",
+            "世界之外", "Beyond the World", "世界の外", "세계밖에서",
+            "代号鸢", "Code: Kite", "コード：カイト", "코드: 연",
+            "花亦山心之月", "Hua Yi Shan", "花亦山心之月", "화역산심지월",
+            "掌门太忙", "Headmaster is Too Busy", "掌门は忙しい", "주인님은 너무 바빠",
 
-    // ===== 近年新二游 =====
-    "重返未来：1999", "Reverse: 1999", "リバース：1999", "리버스: 1999",
-    "异环", "Neverness to Everness", "異環", "이환",
-    "无期迷途", "Path to Nowhere", "無期迷途", "패스 투 나우웨어",
-    "铃兰之剑", "Sword of Convallaria", "スズランの剣", "은방울꽃의 검",
-    "千年之旅", "Echocalypse", "エコカリプス", "에코칼립스",
-    "交错战线", "Frontier Cross", "交錯戦線", "교차전선",
-    "依露希尔：星晓", "Echocalypse", "エコカリプス", "에코칼립스",
-    "深空之眼", "Aether Gazer", "エーテルゲイザー", "에이더 게이저",
-    "幻塔", "Tower of Fantasy", "Tower of Fantasy", "타워 오브 판타지",
-    "灵魂潮汐", "Soul Tide", "ソウルタイド", "소울타이드",
-    "悠久之树", "Eternal Tree", "悠久の樹", "유구의 나무",
-    "苍翼：混沌效应", "BlazBlue: Entropy Effect", "ブレイブルー：エントロピーエフェクト", "블레이블루: 엔트로피 이펙트",
-    "雾境序列", "Mist Sequence", "霧境序列", "안개순서",
-    "环行旅舍", "Circle Traveler", "サークルトラベラー", "순환여관",
-    "斯露德", "Thrud", "スルッド", "스루드",
-    "彼界", "The Lost Land", "彼の界", "피계",
-    "行界", "Xingjie", "行界", "행계",
-    "异象回声", "Echoes of Anomaly", "異象エコー", "이상에코",
-    "暗号：瞳", "Cipher: Eye", "暗号：瞳", "암호: 동",
-    "蓝色星原：旅谣", "Blue Star: Travel Ballad", "蒼き星原：旅謡", "푸른성원: 여요",
+            // ----- 其他有共识二游 -----
+            "高能手办团", "Figure Story", "ハンドメイドフィギュア団", "고능수반단",
+            "山海镜花", "Shan Hai Jing Hua", "山海鏡花", "산해경화",
+            "大王不高兴", "The Monkey King: Uproar in Heaven", "大王不高興", "대왕불고흥",
+            "空匣人型", "Empty Frame", "空匣人型", "공갑인형",
+            "灰烬战线", "Ash Arms", "アッシュアームズ", "애쉬 아머즈",
+            "湮灭效应", "Annihilation Effect", "消滅効果", "소멸효과",
+            "潘多拉的回响", "Pandora's Echo", "パンドラの反響", "판도라의 반향",
+            "银翼计划", "Silver Wing Plan", "銀翼計画", "은익계획",
+            "苍蓝誓约", "Azure Oath", "蒼藍誓約", "창람서약",
+            "深渊地平线", "Abyss Horizon", "アビスホライズン", "어비스 호라이즌",
+            "拂晓：胜利之刻", "Daybreak", "フォーダウン", "여명: 승리의 순간",
+            "战火使命", "Mission of War", "戦火使命", "전화사명",
+            "300大作战", "300 Heroes", "300ヒーローズ", "300 대작전",
+            "阿卡夏计划", "Project Akasha", "アカシャ計画", "아카샤 프로젝트",
+            "胜利女神：妮姬", "GODDESS OF VICTORY: NIKKE", "勝利の女神：NIKKE", "승리의 여신: 니케",
+            "闪耀！优俊少女", "Umamusume: Pretty Derby", "ウマ娘 プリティーダービー", "우마무스메 프리티 더비",
+            "遗忘之海",
+        ];
 
-    // ===== 女性向 / 乙女二游 =====
-    "光与夜之恋", "Light and Night", "光と夜の恋", "빛과 밤의 사랑",
-    "时空中的绘旅人", "Lovebrush Chronicles", "時空の絵旅人", "다시 그리는 시간",
-    "世界之外", "Beyond the World", "世界の外", "세계밖에서",
-    "代号鸢", "Code: Kite", "コード：カイト", "코드: 연",
-    "花亦山心之月", "Hua Yi Shan", "花亦山心之月", "화역산심지월",
-    "掌门太忙", "Headmaster is Too Busy", "掌门は忙しい", "주인님은 너무 바빠",
+        // ===== DOM 引用 =====
+        const countrySelect = document.getElementById('countrySelect');
+        const chartSelect = document.getElementById('chartSelect');
+        const animeCheckbox = document.getElementById('animeFilter');
+        const statusDiv = document.getElementById('status');
+        const rankContainer = document.getElementById('rankContainer');
 
-    // ===== 其他有共识二游 =====
-    "高能手办团", "Figure Story", "ハンドメイドフィギュア団", "고능수반단",
-    "山海镜花", "Shan Hai Jing Hua", "山海鏡花", "산해경화",
-    "大王不高兴", "The Monkey King: Uproar in Heaven", "大王不高興", "대왕불고흥",
-    "空匣人型", "Empty Frame", "空匣人型", "공갑인형",
-    "灰烬战线", "Ash Arms", "アッシュアームズ", "애쉬 아머즈",
-    "湮灭效应", "Annihilation Effect", "消滅効果", "소멸효과",
-    "潘多拉的回响", "Pandora's Echo", "パンドラの反響", "판도라의 반향",
-    "银翼计划", "Silver Wing Plan", "銀翼計画", "은익계획",
-    "苍蓝誓约", "Azure Oath", "蒼藍誓約", "창람서약",
-    "深渊地平线", "Abyss Horizon", "アビスホライズン", "어비스 호라이즌",
-    "拂晓：胜利之刻", "Daybreak", "フォーダウン", "여명: 승리의 순간",
-    "战火使命", "Mission of War", "戦火使命", "전화사명",
-    "300大作战", "300 Heroes", "300ヒーローズ", "300 대작전",
-    "阿卡夏计划", "Project Akasha", "アカシャ計画", "아카샤 프로젝트",
-    "胜利女神：妮姬", "GODDESS OF VICTORY: NIKKE", "勝利の女神：NIKKE", "승리의 여신: 니케",
-    "闪耀！优俊少女", "Umamusume: Pretty Derby", "ウマ娘 プリティーダービー", "우마무스메 프리티 더비",
-];
+        let allEntries = [];
 
-    // 从本地存储读取关键词
-    function getKeywordList() {
-        const stored = localStorage.getItem('anime_keywords');
-        if (stored) { try { return JSON.parse(stored); } catch(e){} }
-        return [...DEFAULT_KEYWORDS];
-    }
-
-    function saveKeywordList(list) {
-        localStorage.setItem('anime_keywords', JSON.stringify(list));
-    }
-
-    const countrySelect = document.getElementById('countrySelect');
-    const chartSelect = document.getElementById('chartSelect');
-    const animeCheckbox = document.getElementById('animeFilter');
-    const extendCheck = document.getElementById('extendCheck');
-    const statusDiv = document.getElementById('status');
-    const rankContainer = document.getElementById('rankContainer');
-    const editListBtn = document.getElementById('editListBtn');
-    const animeListEditor = document.getElementById('animeListEditor');
-    const animeListText = document.getElementById('animeListText');
-    const saveListBtn = document.getElementById('saveListBtn');
-    const closeListBtn = document.getElementById('closeListBtn');
-
-    let allEntries = [];
-    let top100Entries = [];
-    let currentKeywords = getKeywordList();
-
-    function buildURL(country, chartType, genre, limit = 100) {
-        const path = chartType === 'topgrossing' ? 'topgrossingapplications' : 'toppaidapplications';
-        return `https://itunes.apple.com/${country}/rss/${path}/limit=${limit}/genre=${genre}/json`;
-    }
-
-    async function fetchGenre(url) {
-        try {
-            const resp = await fetch(url);
-            if (!resp.ok) return [];
-            const data = await resp.json();
-            return data.feed?.entry || [];
-        } catch { return []; }
-    }
-
-    function getAppId(entry) { return entry['id']?.attributes?.['im:id'] || ''; }
-    function getAppName(entry) { return entry['im:name']?.label || ''; }
-
-    function extractAppInfo(entry) {
-        const name = getAppName(entry);
-        const developer = entry['im:artist']?.label || '';
-        const appId = getAppId(entry);
-        const images = entry['im:image'];
-        const icon = images?.length >= 3 ? images[2].label : (images?.[0]?.label || '');
-        const priceLabel = entry['im:price']?.label || '';
-        const priceAmount = entry['im:price']?.attributes?.amount || '0';
-        let displayPrice = priceLabel;
-        if (priceAmount === '0.00' || priceLabel === '获取') displayPrice = '免费';
-        return { name, developer, appId, icon, displayPrice };
-    }
-
-    // 包含匹配（忽略大小写）
-    function isAnimeGameByName(name) {
-        const lowerName = name.toLowerCase();
-        return currentKeywords.some(kw => lowerName.includes(kw.toLowerCase()));
-    }
-
-    function renderList(entries, extended = false) {
-        rankContainer.innerHTML = '';
-        if (entries.length === 0) {
-            rankContainer.innerHTML = '<div class="status">😴 没有符合条件的结果</div>';
-            return;
-        }
-        entries.forEach((entry, index) => {
-            const info = extractAppInfo(entry);
-            const rank = index + 1;
-            let rankClass = 'rank-number';
-            if (rank <= 3) rankClass += ' top3';
-            if (extended && rank > 100) rankClass += ' warning';
-
-            const card = document.createElement('a');
-            card.className = 'rank-item';
-            card.href = info.appId ? `https://apps.apple.com/cn/app/id${info.appId}` : '#';
-            card.target = '_blank';
-            card.innerHTML = `
-                <div class="${rankClass}">${rank}</div>
-                <img class="app-icon" src="${info.icon}" alt="" loading="lazy" 
-                     onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2264%22 height=%2264%22><rect fill=%22%23e0e0e0%22 width=%2264%22 height=%2264%22 rx=%2216%22/></svg>'">
-                <div class="app-info">
-                    <div class="app-name">${escapeHtml(info.name)}</div>
-                    <div class="app-developer">${escapeHtml(info.developer)}</div>
-                </div>
-                <div class="app-price ${info.displayPrice === '免费' ? 'free' : ''}">${escapeHtml(info.displayPrice)}</div>
-            `;
-            rankContainer.appendChild(card);
-        });
-    }
-
-    function applyFilterAndRender() {
-        let display = allEntries;
-        if (animeCheckbox.checked) {
-            display = allEntries.filter(entry => isAnimeGameByName(getAppName(entry)));
-        }
-        const isExtended = extendCheck.checked && allEntries.length > 100;
-        let msg = `✅ 共 ${display.length} 款游戏`;
-        if (isExtended && display.length > 100) {
-            msg += ' | 100名后排名仅供参考';
-        }
-        statusDiv.textContent = msg;
-        renderList(display, isExtended);
-    }
-
-    function escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-
-    async function loadAllData() {
-        const country = countrySelect.value;
-        const chart = chartSelect.value;
-        const extend = extendCheck.checked;
-
-        statusDiv.textContent = '⏳ 正在拉取总榜前100...';
-        rankContainer.innerHTML = '';
-
-        const totalUrl = buildURL(country, chart, TOTAL_GENRE, 100);
-        top100Entries = await fetchGenre(totalUrl);
-
-        if (!extend) {
-            allEntries = top100Entries;
-            statusDiv.textContent = '';
-            applyFilterAndRender();
-            return;
+        // ===== 工具函数 =====
+        function buildURL(country, chartType, genre, limit) {
+            limit = limit || 100;
+            const path = chartType === 'topgrossing' ? 'topgrossingapplications' : 'toppaidapplications';
+            return `https://itunes.apple.com/${country}/rss/${path}/limit=${limit}/genre=${genre}/json`;
         }
 
-        statusDiv.textContent = '⏳ 正在拉取子品类补充数据...';
-        const top100Ids = new Set(top100Entries.map(getAppId).filter(Boolean));
-        const subRequests = SUB_GENRES.map(genre => fetchGenre(buildURL(country, chart, genre, 100)));
-        const subResults = await Promise.all(subRequests);
-
-        const merged = [...top100Entries];
-        const seenIds = new Set(top100Ids);
-        for (const subEntries of subResults) {
-            for (const entry of subEntries) {
-                const id = getAppId(entry);
-                if (!id || seenIds.has(id)) continue;
-                seenIds.add(id);
-                merged.push(entry);
+        async function fetchGenre(url) {
+            try {
+                const resp = await fetch(url);
+                if (!resp.ok) return [];
+                const data = await resp.json();
+                return data.feed?.entry || [];
+            } catch {
+                return [];
             }
         }
-        allEntries = merged;
-        statusDiv.textContent = '';
-        applyFilterAndRender();
-    }
 
-    // 关键词编辑器
-    function openEditor() {
-        animeListText.value = currentKeywords.join('\n');
-        animeListEditor.style.display = 'block';
-    }
-    function closeEditor() { animeListEditor.style.display = 'none'; }
-    function saveEditor() {
-        const lines = animeListText.value.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-        currentKeywords = lines;
-        saveKeywordList(currentKeywords);
-        closeEditor();
-        applyFilterAndRender();
-    }
+        function getAppId(entry) {
+            return entry['id']?.attributes?.['im:id'] || '';
+        }
 
-    editListBtn.addEventListener('click', openEditor);
-    saveListBtn.addEventListener('click', saveEditor);
-    closeListBtn.addEventListener('click', closeEditor);
+        function getAppName(entry) {
+            return entry['im:name']?.label || '';
+        }
 
-    countrySelect.addEventListener('change', loadAllData);
-    chartSelect.addEventListener('change', loadAllData);
-    animeCheckbox.addEventListener('change', applyFilterAndRender);
-    extendCheck.addEventListener('change', loadAllData);
+        function extractAppInfo(entry) {
+            const name = getAppName(entry);
+            const developer = entry['im:artist']?.label || '';
+            const appId = getAppId(entry);
+            const images = entry['im:image'];
+            const icon = images?.length >= 3 ? images[2].label : (images?.[0]?.label || '');
+            const priceLabel = entry['im:price']?.label || '';
+            const priceAmount = entry['im:price']?.attributes?.amount || '0';
+            let displayPrice = priceLabel;
+            if (priceAmount === '0.00' || priceLabel === '获取') displayPrice = '免费';
+            return { name, developer, appId, icon, displayPrice };
+        }
 
-    // 页面加载时自动使用中国区数据
-    loadAllData();
-</script>
+        function isAnimeGameByName(name) {
+            const lowerName = name.toLowerCase();
+            return KEYWORDS.some(kw => lowerName.includes(kw.toLowerCase()));
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // ===== 渲染 =====
+        function renderList(entries) {
+            rankContainer.innerHTML = '';
+            if (entries.length === 0) {
+                rankContainer.innerHTML = '<div class="status">没有符合条件的结果</div>';
+                return;
+            }
+            entries.forEach((entry, index) => {
+                const info = extractAppInfo(entry);
+                const rank = index + 1;
+                const rankClass = rank <= 3 ? 'rank-number top3' : 'rank-number';
+
+                const card = document.createElement('a');
+                card.className = 'rank-item';
+                card.href = info.appId ? `https://apps.apple.com/cn/app/id${info.appId}` : '#';
+                card.target = '_blank';
+                card.innerHTML = `
+                        <div class="${rankClass}">${rank}</div>
+                        <img class="app-icon" src="${info.icon}" alt="" loading="lazy"
+                             onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2256%22 height=%2256%22><rect fill=%22%23e0e0e0%22 width=%2256%22 height=%2256%22 rx=%2214%22/></svg>'">
+                        <div class="app-info">
+                            <div class="app-name">${escapeHtml(info.name)}</div>
+                            <div class="app-developer">${escapeHtml(info.developer)}</div>
+                        </div>
+                        <div class="app-price ${info.displayPrice === '免费' ? 'free' : ''}">${escapeHtml(info.displayPrice)}</div>
+                    `;
+                rankContainer.appendChild(card);
+            });
+        }
+
+        function applyFilterAndRender() {
+            let display = allEntries;
+            if (animeCheckbox.checked) {
+                display = allEntries.filter(entry => isAnimeGameByName(getAppName(entry)));
+            }
+            statusDiv.textContent = `共 ${display.length} 款游戏`;
+            renderList(display);
+        }
+
+        // ===== 数据加载 =====
+        async function loadAllData() {
+            const country = countrySelect.value;
+            const chart = chartSelect.value;
+
+            statusDiv.textContent = '正在加载...';
+            rankContainer.innerHTML = '';
+
+            const url = buildURL(country, chart, TOTAL_GENRE, 100);
+            allEntries = await fetchGenre(url);
+
+            statusDiv.textContent = '';
+            applyFilterAndRender();
+        }
+
+        // ===== 事件绑定 =====
+        countrySelect.addEventListener('change', loadAllData);
+        chartSelect.addEventListener('change', loadAllData);
+        animeCheckbox.addEventListener('change', applyFilterAndRender);
+
+        // ===== 启动 =====
+        loadAllData();
+    </script>
+
 </body>
 </html>
